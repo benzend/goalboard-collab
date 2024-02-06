@@ -13,7 +13,7 @@ https://www.figma.com/file/WlrtJXxCnsjjGGoJaYPqCk/Goalboard?type=design&node-id=
 ## Tech stack
 
 - GoLang
-- React (CRA) with TypeScript
+- React (Vite) with TypeScript
 
 ## Setup & Development
 
@@ -26,5 +26,5 @@ Steps for setup
 
 Steps for running
 
-- While in /frontend `npm run start`
+- While in /frontend `npm run dev`
 - While in /backend `go run main.go`

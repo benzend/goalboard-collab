@@ -1,8 +1,9 @@
-import { Form, Link } from 'react-router-dom';
+import { Form, Link, useNavigate } from 'react-router-dom';
 import { Nav } from './components/Nav';
 import { FormEvent, FormEventHandler } from 'react';
 
 export const Login = () => {
+  const navigate = useNavigate();
   const handleSubmit: FormEventHandler = (e: FormEvent) => {
     e.preventDefault();
 
@@ -15,6 +16,9 @@ export const Login = () => {
     const password = target.password.value;
 
     console.log({ email, password });
+
+    // TODO: have an actual ID
+    navigate('/ksjldfksjf/goals');
 
     // TODO: Handle this in our backend
   };

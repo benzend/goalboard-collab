@@ -5,6 +5,7 @@ import { Login } from './Login.tsx';
 import './index.css';
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { loader as userGoalsLoader, UserGoals } from './UserGoals.tsx';
 
 const router = createBrowserRouter([
   {
@@ -14,6 +15,12 @@ const router = createBrowserRouter([
   {
     path: '/login',
     element: <Login />,
+  },
+  {
+    path: '/:userId/goals',
+    element: <UserGoals />,
+
+    loader: userGoalsLoader,
   },
 ]);
 

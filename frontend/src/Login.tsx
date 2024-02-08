@@ -1,6 +1,7 @@
 import { Form, Link, useNavigate } from 'react-router-dom';
 import { Nav } from './components/Nav';
 import { FormEvent, FormEventHandler } from 'react';
+import { Button } from './components/Button';
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -60,12 +61,9 @@ export const Login = () => {
             <span className="text-cyan-600 underline">Sign up</span>
           </Link>
 
-          <button
-            type="submit"
-            className="fixed bottom-2 right-2 bg-cyan-500 text-white px-4 py-2 rounded-2xl"
-          >
+          <Button type="submit" className="fixed bottom-2 right-2">
             Sign in
-          </button>
+          </Button>
 
           {/**
            * TODO: Handle for password forgot

@@ -1,6 +1,7 @@
 import { FormEvent, FormEventHandler } from 'react';
 import { Form, useNavigate } from 'react-router-dom';
 import { Nav } from './components/Nav';
+import { Button } from './components/Button';
 
 export const UserGoalsNew = () => {
   const navigate = useNavigate();
@@ -83,12 +84,9 @@ export const UserGoalsNew = () => {
             </select>
           </label>
 
-          <button
-            type="submit"
-            className="fixed bottom-2 right-2 bg-cyan-600 text-white px-5 py-3 rounded-2xl"
-          >
+          <Button type="submit" className="fixed bottom-2 right-2">
             Create
-          </button>
+          </Button>
         </Form>
       </main>
     </div>

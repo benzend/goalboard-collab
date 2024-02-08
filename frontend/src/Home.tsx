@@ -1,6 +1,8 @@
 import 'react';
 import { Link } from 'react-router-dom';
 import { Nav } from './components/Nav';
+import cn from 'classnames';
+import { getButtonClasses } from './components/Button';
 
 export const Home = () => {
   return (
@@ -11,13 +13,23 @@ export const Home = () => {
 
         <section>
           <Link to="/login">
-            <span className="rounded-2xl bg-cyan-600 text-white inline-block w-20 py-2">
+            <span
+              className={cn(
+                getButtonClasses('primary'),
+                'inline-block w-20 py-2 px-0'
+              )}
+            >
               Sign in
             </span>
           </Link>
           <br className="mb-6" />
           <Link to="/register">
-            <span className="rounded-2xl border border-cyan-600 text-cyan-600 inline-block w-20 py-2">
+            <span
+              className={cn(
+                getButtonClasses('outline'),
+                'inline-block w-20 py-2 px-0'
+              )}
+            >
               Sign up
             </span>
           </Link>

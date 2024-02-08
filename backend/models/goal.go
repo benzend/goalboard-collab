@@ -5,35 +5,51 @@ import (
 )
 
 type Goal struct {
-	ID            string
+	id            string
 	name          string
-	target        uint   // ms
+	target        string // ms
 	targetPer     string // day | week | month
-	CREATEDATDATE string // datetime
+	createdAtDate string // datetime
 	updatedAt     string // datetime
 }
 
-type ModelId struct {
-	models.ModelId
+type GoalModelHelperMethods interface {
+	SetGoalID(uint)
+	GetGoalId() uint
+
+	SetGoalTarget(string)
+	GetGoalTarget() string
+
+	setTargetDates(string)
+	getSetTargetDates() string
+
+	SetCreatedAt(string)
+	GetCreatedAt() string
 }
 
-func (g *Goal) Default(id string) *Goal {
+// SetId sets the ID of MyGoal.
+func (g *Goal) SetGoalID(id string) {
+	g.id = id // Access id field of embedded Goal
+}
 
-	g.CREATEDATDATE := SetCreatedAtE()
+// GetId returns the ID of MyGoal.
+// func (g *Goal) GetGoalId() int {
+// 	return g.id
+// }
 
+func (g *Goal) SetCreatedAt() {
+	g.createdAtDate = time.Now().String()
+}
+
+func (g *Goal) GetCreatedAt() string {
+	return g.createdAtDate
+}
+
+func (g *Goal) Default(goalId string, name string) *Goal {
+
+	g.SetCreatedAt()
 	return &Goal{
-		ID:        id,
-		name:      "somerandomname",
-		target:    60000,
-		targetPer: "day",
-
-		createdAt: g.GetCreatedAt(),
-		updatedAt: time.Now().String(),
+		id:   goalId,
+		name: name,
 	}
-}
-
-// This will act as a method default overide since we are unable to palce default args if we wanted to test
-func NewDefault() *Goal {
-	goal := new(Goal)
-	return goal.Default("default_id")
 }

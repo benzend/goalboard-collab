@@ -1,7 +1,7 @@
 package models
 
 type Activity struct {
-	id string
+	id       string
 	duration uint // ms
 
 	goalId string

@@ -1,36 +1,39 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type Goal struct {
-	id        string
-	name      string
-	target    uint   // ms
-	targetPer string // day | week | month
-	createdAt string // datetime
-	updatedAt string // datetime
+	ID            string
+	name          string
+	target        uint   // ms
+	targetPer     string // day | week | month
+	CREATEDATDATE string // datetime
+	updatedAt     string // datetime
 }
 
-func (g Goal) Default() Goal {
-	return Goal{
-		id:        "ksjfkjdjf",
+type ModelId struct {
+	models.ModelId
+}
+
+func (g *Goal) Default(id string) *Goal {
+
+	g.CREATEDATDATE := SetCreatedAtE()
+
+	return &Goal{
+		ID:        id,
 		name:      "somerandomname",
 		target:    60000,
 		targetPer: "day",
 
-		createdAt: time.Now().String(),
+		createdAt: g.GetCreatedAt(),
 		updatedAt: time.Now().String(),
 	}
 }
 
-func (g Goal) SetId(setGoalId string) {
-	g.id = setGoalId
-}
-
-func (g Goal) GetGoalId() string {
-	return g.id
-}
-
-func (g Goal) GetCreatedAt() string {
-	return g.createdAt
+// This will act as a method default overide since we are unable to palce default args if we wanted to test
+func NewDefault() *Goal {
+	goal := new(Goal)
+	return goal.Default("default_id")
 }

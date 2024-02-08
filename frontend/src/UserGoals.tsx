@@ -18,7 +18,7 @@ export const UserGoals = () => {
     <div className="min-h-screen">
       <Nav />
 
-      <main className="px-10 pt-10  s">
+      <main className="px-10 pt-10">
         {data.goals.length ? (
           data.goals.map((g) => {
             // TODO: handle real goals

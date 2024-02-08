@@ -6,6 +6,7 @@ import './index.css';
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { loader as userGoalsLoader, UserGoals } from './UserGoals.tsx';
+import { UserGoalsNew } from './UserGoalsNew.tsx';
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
     element: <UserGoals />,
 
     loader: userGoalsLoader,
+  },
+  {
+    path: '/:userId/goals/new',
+    element: <UserGoalsNew />,
   },
 ]);
 

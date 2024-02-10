@@ -1,15 +1,16 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/benzend/goalboard/backend/models"
 )
 
 // Hello world, the web server
-func GetUserGoals(w http.ResponseWriter, req *http.Request) {
+func CreateUserGoals(w http.ResponseWriter, req *http.Request) {
 	// Parse form data
 	var newGoal models.Goal
 
@@ -20,20 +21,49 @@ func GetUserGoals(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// // Access form values
-	id := req.Form.Get("id")
-	name := req.Form.Get("name")
+	idStr := req.FormValue("id")
+	id, err := strconv.Atoi(idStr)
+
 	// target := req.Form.Get("target")
 	// targetPer := req.Form.Get("targetPer")
 	// createdAtDate := req.Form.Get("createdAtDate")
 	// updatedAt := req.Form.Get("updatedAt")
 
-	fmt.Printf("THE ID IS", newGoal.Default(id, name))
+	// Marshal the Goal object to JSON
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Set the content type to JSON
+	w.Header().Set("Content-Type", "application/json")
+	// Write the JSON response
+
+	switch req.Method {
+
+	case http.MethodPost:
+
+		req, err := json.Marshal(
+			newGoal.Default(id),
+		)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		w.Write(req)
+
+	default:
+
+	}
 
 }
 
 func main() {
 	// Hello world, the web server
-	http.HandleFunc("/goals", GetUserGoals)
+	http.HandleFunc("/goals", CreateUserGoals)
 
 	log.Println("Listening for requests at http://localhost:8000/")
 

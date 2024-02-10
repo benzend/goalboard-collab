@@ -7,11 +7,16 @@ import './index.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { loader as userGoalsLoader, UserGoals } from './UserGoals.tsx';
 import { UserGoalsNew } from './UserGoalsNew.tsx';
+import { Register } from './Register.tsx';
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <Home />,
+  },
+  {
+    path: '/register',
+    element: <Register />,
   },
   {
     path: '/login',

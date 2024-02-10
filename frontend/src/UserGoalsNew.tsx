@@ -4,6 +4,7 @@ import { Nav } from './components/Nav';
 import { Button } from './components/Button';
 import { Input } from './components/Input';
 import { Select } from './components/Select';
+import { Heading } from './components/Heading';
 
 export const UserGoalsNew = () => {
   const navigate = useNavigate();
@@ -31,7 +32,9 @@ export const UserGoalsNew = () => {
       <Nav />
 
       <main className="px-10 pt-10">
-        <h1 className="text-xl font-semibold mb-10">Create new Goal</h1>
+        <Heading el="h1" type="h2" className="mb-10">
+          Create new Goal
+        </Heading>
 
         <Form onSubmit={handleSubmit}>
           <label htmlFor="name">

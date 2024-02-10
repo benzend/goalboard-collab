@@ -3,13 +3,16 @@ import { Link } from 'react-router-dom';
 import { Nav } from './components/Nav';
 import cn from 'classnames';
 import { getButtonClasses } from './components/Button';
+import { Heading } from './components/Heading';
 
 export const Home = () => {
   return (
     <div className="min-h-screen">
       <Nav />
       <main className="pt-20 text-center">
-        <h1 className="text-4xl font-bold mb-20">Goalboard</h1>
+        <Heading el="h1" type="h1" className="mb-20">
+          Goalboard
+        </Heading>
 
         <section>
           <Link to="/login">

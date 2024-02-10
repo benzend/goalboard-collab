@@ -8,6 +8,10 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { loader as userGoalsLoader, UserGoals } from './UserGoals.tsx';
 import { UserGoalsNew } from './UserGoalsNew.tsx';
 import { Register } from './Register.tsx';
+import {
+  loader as userActiviesNewLoader,
+  UserActivitiesNew,
+} from './UserActivitiesNew.tsx';
 
 const router = createBrowserRouter([
   {
@@ -31,6 +35,12 @@ const router = createBrowserRouter([
   {
     path: '/:userId/goals/new',
     element: <UserGoalsNew />,
+  },
+  {
+    path: '/:userId/activities/new',
+    element: <UserActivitiesNew />,
+
+    loader: userActiviesNewLoader,
   },
 ]);
 

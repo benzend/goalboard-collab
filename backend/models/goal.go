@@ -147,6 +147,7 @@ func (g *Goal) GetUserResponse(w http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			firstValue := data["Name"]
 			SetName(g, firstValue)
+			InitGetters(g)
 			///CALL THE REST OF THE SETERS HERE AND PASS THE VALUES
 
 			w.Write(jsonResponse)

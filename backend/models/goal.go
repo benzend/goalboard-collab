@@ -1,6 +1,8 @@
 package models
 
 import (
+	"encoding/json"
+	"net/http"
 	"time"
 )
 
@@ -29,59 +31,75 @@ type GoalModelHelperMethods interface {
 	SetCreatedAt(string)
 	GetCreatedAt() string
 
-	SetUpdatedAtDate(string)
+	SetUpdatedDate(string)
 	GetUpdatedDate() string
+
+	SetName(string)
+	GetName(string)
 }
 
-// SetId sets the ID of MyGoal.
-func (g *Goal) SetGoalID(id int) {
-	g.ID = id // Access id field of embedded Goal
-}
+var (
+	SetName = func(g *Goal, arg interface{}) {
+		if Name, ok := arg.(string); ok {
+			g.Name = Name
 
-// GetId returns the ID of MyGoal.
-func (g *Goal) GetGoalId() int {
-	return g.ID
-}
+		}
 
-func (g *Goal) SetCreatedAt() {
-	g.CreatedAtDate = time.Now().String()
-}
+	}
 
-func (g *Goal) GetCreatedAt() string {
-	return g.CreatedAtDate
-}
+	SetGoalID = func(g *Goal, arg interface{}) {
+		if Id, ok := arg.(int); ok {
+			g.ID = Id
+		}
 
-func (g *Goal) SetGoalTarget(target uint) {
-	g.Target = target
-}
+	}
 
-func (g *Goal) setTargetPer(setTargetPer string) {
-	g.TargetPer = setTargetPer
-}
+	SetCreatedAt = func(g *Goal, arg interface{}) {
+		if CreatedAtDate, ok := arg.(string); ok {
+			CreatedAtDate = time.Now().String()
+			g.CreatedAtDate = CreatedAtDate
 
-func (g *Goal) getTargetPer() string {
-	return g.TargetPer
-}
+		}
+	}
 
-func (g *Goal) GetGoalTarget() uint {
-	return g.Target
-}
+	SetGoalTarget = func(g *Goal, target uint) {
+		g.Target = target
+	}
 
-func (g *Goal) SetName(name string) {
-	g.Name = name
-}
+	setTargetPer = func(g *Goal, setTargetPer string) {
+		g.TargetPer = setTargetPer
+	}
 
-func (g *Goal) GetName() string {
-	return g.Name
-}
+	SetUpdatedAtDate = func(g *Goal) {
+		g.UpdatedAt = time.Now().String()
+	}
+)
 
-func (g *Goal) SetUpdatedAtDate(updatedTime string) {
-	g.UpdatedAt = updatedTime
-}
+var (
+	getTargetPer = func(g *Goal) string {
+		return g.TargetPer
+	}
 
-func (g *Goal) GetUpdatedDateTime() string {
-	return g.UpdatedAt
-}
+	GetGoalId = func(g *Goal) int {
+		return g.ID
+	}
+
+	GetCreatedAt = func(g *Goal) string {
+		return g.CreatedAtDate
+	}
+
+	GetGoalTarget = func(g *Goal) uint {
+		return g.Target
+	}
+
+	GetName = func(g *Goal) string {
+		return g.Name
+	}
+
+	GetUpdatedDateAt = func(g *Goal) string {
+		return g.UpdatedAt
+	}
+)
 
 // ID            int    `json:"id"`
 // Name          string `json:"name"`
@@ -89,21 +107,63 @@ func (g *Goal) GetUpdatedDateTime() string {
 // TargetPer     string `json:"targetper"`  // day | week | month
 // CreatedAtDate string `json:"datetime"`   // datetime
 // UpdatedAt     string `json:"updatetime"` // datetime
-func (g *Goal) Default(id int, name string, target uint, TargetPer string, updatedTime string) *Goal {
-	g.SetGoalID(id)
-	g.SetName(name)
-	g.SetGoalTarget(target)
-	g.setTargetPer(TargetPer)
-	g.SetCreatedAt()
-	g.SetUpdatedAtDate(updatedTime)
-	// for _, n := range setVals {
 
-	// }
+func (g *Goal) GetUserResponse(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 
+	// Get the form values
+	userName := req.FormValue("Name")
+
+	switch req.Method {
+
+	case http.MethodPost:
+
+		data := map[string]string{
+			"Name": userName,
+			// target := req.Form.Get("target")
+			// targetPer := req.Form.Get("targetPer")
+			// createdAtDate := req.Form.Get("createdAtDate")
+			// updatedAt := req.Form.Get("updatedAt")
+		}
+
+		// Unmarshal the JSON data into the map
+
+		// Decode the JSON data from the request body into the map
+		err := json.NewDecoder(req.Body).Decode(&data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// Access the values from the map
+
+		jsonResponse, err := json.Marshal(&data)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if err != nil {
+			firstValue := data["Name"]
+			SetName(g, firstValue)
+			///CALL THE REST OF THE SETERS HERE AND PASS THE VALUES
+
+			w.Write(jsonResponse)
+		}
+
+	default:
+		return
+	}
+}
+
+var InitGetters = func(g *Goal) *Goal {
 	return &Goal{
-		ID:               g.GetGoalId(),
-		Name:             g.GetName(),
-		CreatedAtDate:    g.GetCreatedAt(),
-		SetUpdatedAtDate: g.GetUpdatedDateTime(),
+		ID:            GetGoalId(g),
+		Name:          GetName(g),
+		Target:        GetGoalTarget(g),
+		TargetPer:     getTargetPer(g),
+		CreatedAtDate: GetCreatedAt(g),
+		UpdatedAt:     GetUpdatedDateAt(g),
 	}
 }

@@ -2,6 +2,7 @@ import { FormEvent, FormEventHandler } from 'react';
 import { Form, useNavigate } from 'react-router-dom';
 import { Nav } from './components/Nav';
 import { Button } from './components/Button';
+import { Input } from './components/Input';
 
 export const UserGoalsNew = () => {
   const navigate = useNavigate();
@@ -35,11 +36,11 @@ export const UserGoalsNew = () => {
           <label htmlFor="name">
             <span className="font-thin">Goal</span>
             <br />
-            <input
+            <Input
               type="text"
               name="name"
               id="goalNameInput"
-              className="border border-black w-full px-2 h-10 rounded shadow-lg"
+              inputStyleType="w-full"
             />
           </label>
 
@@ -48,11 +49,11 @@ export const UserGoalsNew = () => {
           <label htmlFor="dur">
             <span className="font-thin">For</span>
             <br />
-            <input
+            <Input
               type="number"
               name="dur"
               id="goalDurInput"
-              className="border border-black px-2 h-10 rounded shadow-lg w-20"
+              inputStyleType="w-lg"
             />
 
             <select

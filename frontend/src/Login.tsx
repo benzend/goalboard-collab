@@ -2,6 +2,7 @@ import { Form, Link, useNavigate } from 'react-router-dom';
 import { Nav } from './components/Nav';
 import { FormEvent, FormEventHandler } from 'react';
 import { Button } from './components/Button';
+import { Input } from './components/Input';
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -34,11 +35,11 @@ export const Login = () => {
           <label htmlFor="email">
             <span className="font-thin">Email</span>
             <br />
-            <input
+            <Input
               type="email"
               name="email"
               id="email"
-              className="border border-black w-full px-2 py-1 rounded shadow-lg"
+              inputStyleType="w-full"
             />
           </label>
 
@@ -47,11 +48,11 @@ export const Login = () => {
           <label htmlFor="password">
             <span className="font-thin">Password</span>
             <br />
-            <input
+            <Input
               type="password"
               name="password"
               id="password"
-              className="border border-black w-full px-2 py-1 rounded shadow-lg"
+              inputStyleType="w-full"
             />
           </label>
 

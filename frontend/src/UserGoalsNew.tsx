@@ -3,6 +3,7 @@ import { Form, useNavigate } from 'react-router-dom';
 import { Nav } from './components/Nav';
 import { Button } from './components/Button';
 import { Input } from './components/Input';
+import { Select } from './components/Select';
 
 export const UserGoalsNew = () => {
   const navigate = useNavigate();
@@ -56,17 +57,18 @@ export const UserGoalsNew = () => {
               inputStyleType="w-lg"
             />
 
-            <select
+            <Select
               name="durType"
               id="durTypeSelect"
               className="border border-black px-2 h-10 rounded shadow-lg bg-white ml-2"
+              selectStyleType="default"
             >
               <option value="seconds">Seconds</option>
               <option value="minutes">Minutes</option>
               <option value="hours">Hours</option>
               <option value="days">Days</option>
               <option value="weeks">Weeks</option>
-            </select>
+            </Select>
           </label>
 
           <br className="mb-10" />
@@ -74,15 +76,16 @@ export const UserGoalsNew = () => {
           <label htmlFor="durPer">
             <span className="font-thin">Every</span>
             <br />
-            <select
+            <Select
               name="durPer"
               id="durPerSelect"
               className="border border-black px-2 h-10 rounded shadow-lg bg-white"
+              selectStyleType="default"
             >
               <option value="day">Day</option>
               <option value="week">Week</option>
               <option value="month">Month</option>
-            </select>
+            </Select>
           </label>
 
           <Button type="submit" className="fixed bottom-2 right-2">

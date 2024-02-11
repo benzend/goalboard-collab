@@ -4,18 +4,17 @@ package models
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 	"time"
 )
 
 type Goal struct {
-	ID               int      `json:"id"`
-	Name             string   `json:"name"`
-	Target           uint     `json:"target"`
-	TargetPer        string   `json:"targetper"`       // day | week | month
-	CreatedAtDate    string   `json:"datetime"`        // datetime
-	UpdatedAt        string   `json:"updatetime"`      // datetime
-	GoalProgress     int      `json:"progress"`        // 100% 50% ect
-	ActivitesPerGoal []string `json:"ActivityPerGoal"` //will retuern a array of activies tied to the relation ship of the goal id
+	ID           string   `json:"Id"`
+	Name         string   `json:"username"`
+	Target       string   `json:"target"`
+	TargetPer    string   `json:"targetPer"`
+	GoalProgress string   `json:"percentage"`
+	Activities   []string `json:"ActivityList"`
 }
 
 func (g *Goal) CreatedDateTime() string {
@@ -31,20 +30,19 @@ func (g *Goal) CreateUserGoals(w http.ResponseWriter, req *http.Request) {
 
 	case http.MethodPost:
 
-		Id := req.PostFormValue("Id")
-		Name := req.PostFormValue("username")
-		Target := req.PostFormValue("target")
-		TargetPer := req.PostFormValue("targetPer")
-		GoalProgress := req.PostFormValue("percentage")
-		ActivitesPerGoal := req.PostFormValue("ActviityList")
+		err := json.NewDecoder(req.Body).Decode(&g)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 
 		values := map[string]string{
-			"Name":             Name,
-			"Id":               Id,
-			"Target":           Target,
-			"TargetPer":        TargetPer,
-			"GoalProgres":      GoalProgress,
-			"ActivitesPerGoal": ActivitesPerGoal,
+			"Name":             g.Name,
+			"Id":               g.ID,
+			"Target":           g.Target,
+			"TargetPer":        g.TargetPer,
+			"GoalProgres":      g.GoalProgress,
+			"ActivitesPerGoal": strings.Join(g.Activities, ", "),
 			"CreatedAtDate":    g.CreatedDateTime(),
 			"UpdatedAt":        g.CreatedDateTime(),
 		}

@@ -6,7 +6,7 @@ import (
 )
 
 type User struct {
-	ID       int    `json:"id"`
+	ID       string `json:"id"`
 	Name     string `json:"name"`
 	UserName string `json:UserName`
 	Password string `json:password`
@@ -20,16 +20,17 @@ func (u *User) CreateUser(w http.ResponseWriter, req *http.Request) {
 
 	case http.MethodPost:
 
-		Id := req.PostFormValue("Id")
-		Name := req.PostFormValue("fristName")
-		Target := req.PostFormValue("UserName")
-		Password := req.PostFormValue("password")
+		err := json.NewDecoder(req.Body).Decode(&u)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 
 		values := map[string]string{
-			"Name":     Name,
-			"Id":       Id,
-			"Target":   Target,
-			"Password": Password,
+			"Id":       u.ID,
+			"Name":     u.Name,
+			"UserName": u.UserName,
+			"Password": u.Password,
 		}
 
 		jsonResponse, err := json.Marshal(values)

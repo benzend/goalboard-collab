@@ -40,8 +40,6 @@ func (u *User) CreateUser(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		w.Write(jsonResponse)
-
 	default:
 		//Replace with better error for end user
 		jsonResponse, err := json.Marshal("Unable to find values")

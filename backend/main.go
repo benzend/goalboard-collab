@@ -6,14 +6,15 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/benzend/goalboard/backend/database"
 	"github.com/benzend/goalboard/backend/models"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 var jwtKey = []byte("secrect")
 
 type JWTData struct {
-	jwt.StandardClaims
+	jwt.Claims
 	CustomClaims map[string]string `json:"custom_claims"`
 }
 type User struct {
@@ -99,6 +100,14 @@ func authMiddleware(next http.Handler) http.Handler {
 
 func main() {
 	// Hello world, the web server
+	db, err := database.Connect()
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer db.Close()
+
 	var newGoal models.Goal
 	var newUser models.User
 
@@ -106,7 +115,7 @@ func main() {
 
 	http.HandleFunc("/logout", logoutHandler)
 
-	http.Handle("/goalprogress", http.HandlerFunc(newUser.CreateUser))
+	http.Handle("/CreateUser", http.HandlerFunc(newUser.CreateUser))
 
 	http.Handle("/goals", authMiddleware(http.HandlerFunc(newGoal.CreateUserGoals)))
 

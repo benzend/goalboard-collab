@@ -9,11 +9,11 @@ import (
 
 // TODO: use a secret manager for the password / host / etc
 const (
-  host     = "localhost"
-  port     = 5432
-  user     = "postgres"
-  password = "password" // * configure this to match your psql settings
-  dbname   = "goalboard_psql" // * will need to create a db beforehand until we manage this ourselves (if possible)
+	host     = "localhost"
+	port     = 5432
+	user     = "postgres"
+	password = "password"     // * configure this to match your psql settings
+	dbname   = "goaldBoardDB" // * will need to create a db beforehand until we manage this ourselves (if possible)
 )
 
 func Connect() (db *sql.DB, err error) {
@@ -33,7 +33,7 @@ func Connect() (db *sql.DB, err error) {
 		return nil, err
 	}
 
-  fmt.Println("Successfully connected!")
+	fmt.Println("Successfully connected!")
 
 	return
 }

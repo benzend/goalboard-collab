@@ -11,8 +11,12 @@ export type CreateActivityData = {
 export async function createActivity(
   data: CreateActivityData
 ): Promise<Activity> {
-  // TODO: point to backend
-  return await new Promise((resolve, reject) => {
-    setTimeout(() => resolve({ id: 'jskdjkf', goalId: 'kfjkdjf' }));
+  const res = await fetch('http://localhost:8000/activity', {
+    method: 'POST',
+    body: JSON.stringify(data),
   });
+
+  if (!res.ok) throw new Error('failed to create activity');
+
+  return await res.json();
 }

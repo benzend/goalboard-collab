@@ -4,6 +4,7 @@ import { FormEvent, FormEventHandler } from 'react';
 import { Button } from './components/Button';
 import { Input } from './components/Input';
 import { Heading } from './components/Heading';
+import { loginUser } from './utils/user';
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -11,19 +12,31 @@ export const Login = () => {
     e.preventDefault();
 
     const target = e.target as typeof e.target & {
-      email: { value: string };
+      // email: { value: string };
+      username: { value: string };
       password: { value: string };
     };
 
-    const email = target.email.value;
+    // const email = target.email.value;
+    const username = target.username.value;
     const password = target.password.value;
 
-    console.log({ email, password });
+    console.debug({ username, password });
 
-    // TODO: have an actual ID
-    navigate('/ksjldfksjf/goals');
-
-    // TODO: Handle this in our backend
+    /**
+     * TODO: Figure out how to store user validation internally
+     * TODO: so that we can move around the app freely once
+     * TODO: logged in
+     */
+    loginUser({ username, password })
+      .then((user) => {
+        console.debug({ user });
+        navigate(`/${user.id}/goals`);
+      })
+      .catch((err) => {
+        console.error({ err });
+        alert('failed to login');
+      });
   };
   return (
     <div className="min-h-screen">
@@ -35,13 +48,26 @@ export const Login = () => {
         </Heading>
 
         <Form onSubmit={handleSubmit}>
-          <label htmlFor="email">
+          {/* <label htmlFor="email">
             <span className="font-thin">Email</span>
             <br />
             <Input
               type="email"
               name="email"
               id="email"
+              inputStyleType="w-full"
+            />
+          </label>
+
+          <br className="mb-10" /> */}
+
+          <label htmlFor="username">
+            <span className="font-thin">Username</span>
+            <br />
+            <Input
+              type="text"
+              name="username"
+              id="username"
               inputStyleType="w-full"
             />
           </label>

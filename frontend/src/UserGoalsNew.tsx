@@ -5,6 +5,7 @@ import { Button } from './components/Button';
 import { Input } from './components/Input';
 import { Select } from './components/Select';
 import { Heading } from './components/Heading';
+import { createGoal } from './utils/goal';
 
 export const UserGoalsNew = () => {
   const navigate = useNavigate();
@@ -25,7 +26,15 @@ export const UserGoalsNew = () => {
 
     console.log({ name, dur, durType, durPer });
 
-    navigate('/sdkjfkajdf/goals');
+    createGoal({ name, dur, durPer, durType })
+      .then((goal) => {
+        console.debug({ goal });
+        navigate('/sdkjfkajdf/goals');
+      })
+      .catch((err) => {
+        console.error({ err });
+        alert('failed to create new goal');
+      });
   };
   return (
     <div className="min-h-screen">

@@ -1,9 +1,9 @@
 FROM golang:alpine AS builder
 RUN apk update && apk add --no-cache git
 WORKDIR /app
-ADD /backend ./
-COPY backend/go.mod ./backend
-COPY backend/go.sum ./backend
+COPY go.mod ./
+COPY go.sum ./
+COPY backend ./
 
 WORKDIR /app/backend
 RUN go mod download
@@ -18,7 +18,7 @@ RUN npm run build
 
 FROM alpine
 COPY --from=builder /app /app
-COPY .env ./
+# COPY .env ./
 COPY --from=frontend /app/dist /public
 
 EXPOSE 8000

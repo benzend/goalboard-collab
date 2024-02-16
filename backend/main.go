@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/benzend/goalboard/backend/database"
-	"github.com/benzend/goalboard/backend/models"
+	"github.com/benzend/goalboard/database"
+	"github.com/benzend/goalboard/models"
 	"github.com/golang-jwt/jwt/v5"
 )
 

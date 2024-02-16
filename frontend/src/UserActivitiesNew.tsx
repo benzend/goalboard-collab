@@ -11,6 +11,7 @@ import { Input } from './components/Input';
 import { Select } from './components/Select';
 import { Heading } from './components/Heading';
 import { LoaderData } from './utils/loader-data';
+import { createActivity } from './utils/activity';
 
 export const loader = (async () => {
   // TODO: redirect to login if user unauthed
@@ -38,13 +39,17 @@ export const UserActivitiesNew = () => {
     const dur = target.dur.value;
     const durType = target.durType.value;
 
-    console.log({ goal, dur, durType });
+    console.debug({ goal, dur, durType });
 
-    /**
-     * TODO: submit activity to backend
-     */
-
-    navigate('/sdkjfkajdf/goals');
+    createActivity({ goalId: goal, dur, durType })
+      .then((activity) => {
+        console.debug({ activity });
+        navigate('/sdkjfkajdf/goals');
+      })
+      .catch((err) => {
+        console.error({ err });
+        alert('failed to create activity');
+      });
   };
   return (
     <div className="min-h-screen">

@@ -4,6 +4,7 @@ import { Nav } from './components/Nav';
 import { Input } from './components/Input';
 import { Heading } from './components/Heading';
 import { Button } from './components/Button';
+import { createUser } from './utils/user';
 
 export const Register = () => {
   const navigate = useNavigate();
@@ -11,24 +12,38 @@ export const Register = () => {
     e.preventDefault();
 
     const target = e.target as typeof e.target & {
-      email: { value: string };
+      // email: { value: string };
+      username: { value: string };
+      name: { value: string };
       password: { value: string };
       confirmPassword: { value: string };
     };
 
-    const email = target.email.value;
+    // const email = target.email.value;
+    const username = target.username.value;
+    const name = target.name.value;
     const password = target.password.value;
     const confirmPassword = target.confirmPassword.value;
-
-    console.log({ email, password, confirmPassword });
 
     if (password !== confirmPassword) throw new Error('passwords do not match');
     if (password.length < 8) throw new Error('password is too short');
     if (password.length > 50)
       throw new Error('weird, why is your password this long?');
 
-    // TODO: pass up to backend for account creation
-    navigate('/ksjldfksjf/goals/new');
+    console.debug({ username, name, password });
+
+    createUser({ username, name, password })
+      .then((user) => {
+        console.debug({ user });
+
+        navigate(`/${user.id}/goals/new`);
+      })
+      .catch((err: Error) => {
+        console.error({ err });
+        alert(
+          `Failed to create your account. Please reach out to our support team at ${SUPPORT_EMAIL}`
+        );
+      });
   };
   return (
     <div className="min-h-screen">
@@ -40,13 +55,32 @@ export const Register = () => {
         </Heading>
 
         <Form onSubmit={handleSubmit}>
-          <label htmlFor="email">
+          {/* <label htmlFor="email">
             <span className="font-thin">Email</span>
             <br />
             <Input
               type="email"
               name="email"
               id="email"
+              inputStyleType="w-full"
+            />
+          </label> */}
+
+          <label htmlFor="name">
+            <span className="font-thin">Name</span>
+            <br />
+            <Input type="text" name="name" id="name" inputStyleType="w-full" />
+          </label>
+
+          <br className="mb-10" />
+
+          <label htmlFor="username">
+            <span className="font-thin">Username</span>
+            <br />
+            <Input
+              type="text"
+              name="username"
+              id="username"
               inputStyleType="w-full"
             />
           </label>

@@ -8,7 +8,7 @@ COPY backend ./
 WORKDIR /app/backend
 RUN go mod download
 COPY /backend .
-RUN go build -o /app/backend
+RUN go build -o /app/backend/goalboard
 
 FROM node:20.11-alpine AS frontend
 WORKDIR /app
@@ -17,9 +17,9 @@ RUN npm install
 RUN npm run build
 
 FROM alpine
-COPY --from=builder /app /app
+COPY --from=builder /app/backend/goalboard /app/backend
 # COPY .env ./
 COPY --from=frontend /app/dist /public
 
 EXPOSE 8000
-CMD [ "/app" ]
+CMD [ "/app/backend" ]

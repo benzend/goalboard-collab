@@ -23,7 +23,7 @@ func CreateFile() {
 	defer envFile.Close()
 
 	//to do get cmd input pass to the set env as string
-
+	dd
 	fmt.Println("input text:")
 	var w1, w2, w3 string
 	n, err := fmt.Scan(&w1, &w2, &w3)

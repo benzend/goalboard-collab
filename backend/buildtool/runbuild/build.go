@@ -31,7 +31,6 @@ func CreateFile() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("number of items read: %d\n", n)
 	fmt.Printf("read text: %s %s %s-\n", w1, w2, w3)
 
 	fmt.Printf("number of items read: %d\n", n)

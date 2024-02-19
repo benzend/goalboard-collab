@@ -100,6 +100,7 @@ func authMiddleware(next http.Handler) http.Handler {
 
 func main() {
 	// Hello world, the web server
+
 	db, err := database.Connect()
 
 	if err != nil {

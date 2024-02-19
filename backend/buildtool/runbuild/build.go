@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 )
 
 type envVars struct {
@@ -13,6 +12,7 @@ type envVars struct {
 }
 
 func CreateFile() {
+
 	E := &envVars{}
 
 	envFile, err := os.Create(".env")
@@ -20,36 +20,21 @@ func CreateFile() {
 		fmt.Println("Error creating .env file:", err)
 		os.Exit(1)
 	}
-	defer envFile.Close()
 
-	//to do get cmd input pass to the set env as string
-	dd
-	fmt.Println("input text:")
-	var w1, w2, w3 string
-	n, err := fmt.Scan(&w1, &w2, &w3)
+	fmt.Println("Enter Database UserName")
+
+	_, err = fmt.Scan(&E.DB_PASSWORD)
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("read text: %s %s %s-\n", w1, w2, w3)
-
-	fmt.Printf("number of items read: %d\n", n)
-	fmt.Printf("read line: %s %s %s-\n", w1, w2, w3)
-
-	os.Setenv("DB_USERNAME", getdbb)
-	os.Setenv("DB_PASSWORDY", E.DB_PASSWORD)
-
-	// Run 'go generate'
-	cmd := exec.Command("go", "generate")
-
-	err2 := cmd.Run()
-	if err2 != nil {
-		fmt.Println("Error running 'go generate':", err2)
+	_, err = fmt.Fprintf(envFile, "DB_PASSWORD=\"%s\"\n", E.DB_PASSWORD)
+	if err != nil {
+		fmt.Println("Error writing to .env file:", err)
 		os.Exit(1)
 	}
 
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
 	fmt.Println("Code generation completed successfully.")
+	defer envFile.Close()
 }

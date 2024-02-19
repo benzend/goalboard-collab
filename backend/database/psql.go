@@ -12,8 +12,8 @@ const (
 	host     = "localhost"
 	port     = 5432
 	user     = "postgres"
-	password = "password"     // * configure this to match your psql settings
-	dbname   = "goaldBoardDB" // * will need to create a db beforehand until we manage this ourselves (if possible)
+	password = "mysecretpassword"     // * configure this to match your psql settings
+	dbname   = "postgres" // * will need to create a db beforehand until we manage this ourselves (if possible)
 )
 
 func Connect() (db *sql.DB, err error) {

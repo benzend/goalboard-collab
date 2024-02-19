@@ -5,11 +5,11 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-ADD . ./backend
+ADD . .
 
 FROM base AS development
 
-CMD [ "go", "run", "./backend" ]
+CMD [ "go", "run", "." ]
 
 FROM base AS dev-envs
 
@@ -23,6 +23,6 @@ FROM base
 
 ENV env=PRODUCTION
 
-COPY --from=builder /app/backend/main /main
+COPY --from=builder /app/main /main
 
 CMD [ "/main" ]

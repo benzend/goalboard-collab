@@ -9,7 +9,7 @@ import (
 
 // TODO: use a secret manager for the password / host / etc
 const (
-	host     = "localhost"
+	host     = "db"
 	port     = 5432
 	user     = "postgres"
 	password = "mysecretpassword"     // * configure this to match your psql settings

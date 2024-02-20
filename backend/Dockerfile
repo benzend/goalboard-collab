@@ -1,6 +1,6 @@
 FROM golang:alpine AS base
 RUN apk update && apk add --no-cache git
-WORKDIR /app
+WORKDIR /code
 
 COPY go.mod go.sum ./
 RUN go mod download
@@ -23,6 +23,6 @@ FROM base
 
 ENV env=PRODUCTION
 
-COPY --from=builder /app/main /main
+COPY --from=builder /code/main /main
 
 CMD [ "/main" ]

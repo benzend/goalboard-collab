@@ -2,13 +2,15 @@
 FROM node:lts AS development
 
 ENV CI=true
-ENV PORT=3000
+ENV PORT=5173
 
-WORKDIR /app
-COPY package.json /app/package.json
-COPY package-lock.json /app/package-lock.json
+EXPOSE 5173
+
+WORKDIR /code
+COPY package.json /code/package.json
+COPY package-lock.json /code/package-lock.json
 RUN npm ci
-COPY . /app
+COPY . .
 
 CMD [ "npm", "run", "dev" ]
 
@@ -22,4 +24,4 @@ RUN npm run build
 
 FROM nginx:1.13-alpine
 
-COPY --from=builder /app/build /usr/share/nginx/html
+COPY --from=builder /code/build /usr/share/nginx/html

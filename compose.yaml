@@ -23,6 +23,8 @@ services:
       - PG_PASSWORD=mysecretpassword
     volumes:
       - ./backend/src:/code/src:ro
+    ports:
+      - 8000:8000
     networks:
       - server-side
       - client-side

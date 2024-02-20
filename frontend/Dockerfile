@@ -4,8 +4,6 @@ FROM node:lts AS development
 ENV CI=true
 ENV PORT=5173
 
-EXPOSE 5173
-
 WORKDIR /code
 COPY package.json /code/package.json
 COPY package-lock.json /code/package-lock.json
@@ -15,6 +13,8 @@ COPY . .
 CMD [ "npm", "run", "dev" ]
 
 FROM development as dev-envs
+
+EXPOSE 5173
 
 CMD [ "npm", "run", "dev" ]
 

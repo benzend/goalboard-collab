@@ -8,6 +8,8 @@ services:
       - 5173:5173
     volumes:
       - ./frontend/src:/code/src:ro
+    networks:
+      - client-side
 
   backend:
     build:
@@ -21,6 +23,9 @@ services:
       - PG_PASSWORD=mysecretpassword
     volumes:
       - ./backend/src:/code/src:ro
+    networks:
+      - server-side
+      - client-side
     depends_on:
       db:
         condition: service_healthy
@@ -34,6 +39,8 @@ services:
       - 5432:5432
     volumes:
       - db-data:/var/lib/postgresql/data
+    networks:
+      - server-side
     healthcheck:
       test: ['CMD', 'pg_isready']
       interval: 10s
@@ -42,3 +49,7 @@ services:
 
 volumes:
   db-data: {}
+
+networks:
+  client-side: {}
+  server-side: {}

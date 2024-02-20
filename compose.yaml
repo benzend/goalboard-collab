@@ -4,10 +4,8 @@ services:
     build:
       context: frontend
       target: development
-    networks:
-      - client-side
     ports:
-      - 3000:3000
+      - 5173:5173
     volumes:
       - ./frontend/src:/code/src:ro
 
@@ -17,36 +15,30 @@ services:
       target: development
     environment:
       - ADDRESS=0.0.0.0:8000
-      - RUST_LOG=debug
       - PG_DBNAME=postgres
       - PG_HOST=db
       - PG_USER=postgres
       - PG_PASSWORD=mysecretpassword
-    networks:
-      - client-side
-      - server-side
     volumes:
-      - ./backend/src:/code/src
-      - backend-cache:/code/target
+      - ./backend/src:/code/src:ro
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: postgres:16-alpine
     restart: always
     environment:
       - POSTGRES_PASSWORD=mysecretpassword
-    networks:
-      - server-side
     ports:
       - 5432:5432
     volumes:
       - db-data:/var/lib/postgresql/data
-
-networks:
-  client-side: {}
-  server-side: {}
+    healthcheck:
+      test: ['CMD', 'pg_isready']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  backend-cache: {}
   db-data: {}

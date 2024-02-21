@@ -2,18 +2,21 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
 type User struct {
-	ID       string `json:"id"`
 	Name     string `json:"name"`
-	UserName string `json:UserName`
-	Password string `json:password`
+	UserName string `json:"username"`
+	Password string `json:"password"`
 }
 
+func enableCorsAgain(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
 func (u *User) CreateUser(w http.ResponseWriter, req *http.Request) {
-
+	enableCorsAgain(&w)
 	w.Header().Set("Content-Type", "application/json")
 
 	switch req.Method {
@@ -26,21 +29,14 @@ func (u *User) CreateUser(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		values := map[string]string{
-			"Id":       u.ID,
-			"Name":     u.Name,
-			"UserName": u.UserName,
-			"Password": u.Password,
-		}
-
-		jsonResponse, err := json.Marshal(values)
+		jsonResponse, err := json.Marshal(&u)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		w.Write(jsonResponse)
+		fmt.Println(string(jsonResponse))
 
 	default:
 		//Replace with better error for end user

@@ -2,11 +2,16 @@ package models
 
 //// Create my own goals /CreateGoal Endpoint
 import (
+	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
-	"strings"
 	"time"
+
+	_ "github.com/lib/pq"
 )
+
+var db *sql.DB
 
 type Goal struct {
 	ID           string   `json:"Id"`
@@ -17,61 +22,70 @@ type Goal struct {
 	Activities   []string `json:"ActivityList"`
 }
 
+// InsertGoalData inserts the goal data into the database and returns an error if any
+func InsertGoalData(g *Goal) error {
+
+	// // Prepare the SQL statement
+	// stmt, err := db.Prepare("INSERT INTO goals (Name, ID, Target, TargetPer, GoalProgress, ActivitiesPerGoal, CreatedAtDate, UpdatedAt) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)")
+
+	// if err != nil {
+	// 	return err
+	// }
+	// defer stmt.Close()
+
+	// // Execute the SQL statement
+	// _, err = stmt.Exec(g.Name, g.ID, g.Target, g.TargetPer, g.GoalProgress, strings.Join(g.Activities, ", "), g.CreatedDateTime(), g.CreatedDateTime())
+	// if err != nil {
+	// 	return err
+	// }
+
+	return nil
+
+}
+
 func (g *Goal) CreatedDateTime() string {
 	dt := time.Now()
 	return dt.Format("01-02-2006 15:04:05")
 }
 
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
 func (g *Goal) CreateUserGoals(w http.ResponseWriter, req *http.Request) {
-
 	w.Header().Set("Content-Type", "application/json")
 
 	switch req.Method {
-
 	case http.MethodPost:
-
-		err := json.NewDecoder(req.Body).Decode(&g)
+		var setGoal Goal
+		err := json.NewDecoder(req.Body).Decode(&setGoal)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		values := map[string]string{
-			"Name":             g.Name,
-			"Id":               g.ID,
-			"Target":           g.Target,
-			"TargetPer":        g.TargetPer,
-			"GoalProgres":      g.GoalProgress,
-			"ActivitesPerGoal": strings.Join(g.Activities, ", "),
-			"CreatedAtDate":    g.CreatedDateTime(),
-			"UpdatedAt":        g.CreatedDateTime(),
-		}
-
-		jsonResponse, err := json.Marshal(values)
-
+		// Insert the goal data into the database
+		err = InsertGoalData(&setGoal)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
+		jsonResponse, err := json.Marshal("Success")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		w.Write(jsonResponse)
 
 	default:
-		//Replace with better error for end user
-		jsonResponse, err := json.Marshal("Unable to find values")
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Write(jsonResponse)
 		return
 	}
-
 }
 
 func (g *Goal) GetActivtiesListPerGoal(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
+	enableCors(&w)
 
 	switch req.Method {
 
@@ -93,13 +107,16 @@ func (g *Goal) GetActivtiesListPerGoal(w http.ResponseWriter, req *http.Request)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.Write(jsonResponse)
+
+		fmt.Println(string(jsonResponse))
 		return
 	}
 
 }
 
 func (g *Goal) GetGoalProgress(w http.ResponseWriter, req *http.Request) {
+
+	enableCors(&w)
 
 	w.Header().Set("Content-Type", "application/json")
 

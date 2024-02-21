@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/benzend/goalboard/backend/database"
 	"github.com/benzend/goalboard/backend/models"
+	"github.com/benzend/goalboard/backend/routes"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -100,12 +102,17 @@ func authMiddleware(next http.Handler) http.Handler {
 }
 
 func main() {
+	var ctx = context.Background()
 	// Hello world, the web server
 	db, err := database.Connect()
 
 	if err != nil {
 		panic(err)
 	}
+
+
+	// put the db value into the context to be used in fns
+	ctx = context.WithValue(ctx, "db", db)
 
 	defer db.Close()
 
@@ -118,7 +125,11 @@ func main() {
 
 	http.Handle("/CreateUser", http.HandlerFunc(newUser.CreateUser))
 
-	http.Handle("/goals", authMiddleware(http.HandlerFunc(newGoal.CreateUserGoals)))
+	// http.Handle("/goals", authMiddleware(http.HandlerFunc(newGoal.CreateUserGoals)))
+
+	http.Handle("/goals", authMiddleware(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		routes.Goals(ctx, w, req)
+	})))
 
 	http.Handle("/ActivityList", authMiddleware(http.HandlerFunc(newGoal.GetActivtiesListPerGoal)))
 

@@ -46,6 +46,10 @@ func Connect() (db *sql.DB, err error) {
 
 	env, err := ReadEnvFile(".env")
 
+	if err != nil {
+		panic(fmt.Sprintf("Failed to read env file: %v", err))
+	}
+
 	host := env["host"]
 	password := env["password"]
 	port := 5432

@@ -7,8 +7,11 @@ import (
 )
 
 type envVars struct {
-	DB_PASSWORD string
-	DB_USERNAME string
+	host     string
+	password string
+	port     int
+	user     string
+	dbname   string
 }
 
 func CreateFile() {
@@ -23,13 +26,17 @@ func CreateFile() {
 
 	fmt.Println("Enter Database UserName")
 
-	_, err = fmt.Scan(&E.DB_PASSWORD)
+	_, err = fmt.Scan(
+		&E.password,
+		&E.dbname,
+	)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = fmt.Fprintf(envFile, "DB_PASSWORD=\"%s\"\n", E.DB_PASSWORD)
+	_, err = fmt.Fprintf(envFile, "password=\"%s\"\n", E.password)
+
 	if err != nil {
 		fmt.Println("Error writing to .env file:", err)
 		os.Exit(1)

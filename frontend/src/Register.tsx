@@ -24,7 +24,7 @@ export const Register = () => {
     const name = target.name.value;
     const password = target.password.value;
     const confirmPassword = target.confirmPassword.value;
-
+    const ContactUsEmail = "testsemail@gmail.com"
     if (password !== confirmPassword) throw new Error('passwords do not match');
     if (password.length < 8) throw new Error('password is too short');
     if (password.length > 50)
@@ -36,12 +36,12 @@ export const Register = () => {
       .then((user) => {
         console.debug({ user });
 
-        navigate(`/${user.id}/goals/new`);
+        navigate(`/login`);
       })
       .catch((err: Error) => {
         console.error({ err });
         alert(
-          `Failed to create your account. Please reach out to our support team at ${SUPPORT_EMAIL}`
+          `Failed to create your account. Please reach out to our support team at ${ContactUsEmail}`
         );
       });
   };

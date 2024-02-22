@@ -18,7 +18,7 @@ func Connect() (db *sql.DB, err error) {
 	env, err := env.ReadFile(".env")
 
 	if err != nil {
-		panic("failed to read env file")
+		panic(fmt.Sprintf("Failed to read env file: %v", err))
 	}
 
 	host := utils.Invariant[string](env["host"], "missing `host` env variable")

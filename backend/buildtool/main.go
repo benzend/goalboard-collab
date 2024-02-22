@@ -14,7 +14,7 @@ package main
 // cmd.Stderr = os.Stderr
 */
 import (
-	buildtool "github.com/benzend/goalboard/backend/buildtool/runbuild"
+	buildtool "github.com/benzend/goalboard/buildtool/runbuild"
 )
 
 func main() {

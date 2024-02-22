@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/benzend/goalboard/utils"
 	_ "github.com/lib/pq"
 )
 
@@ -50,11 +51,15 @@ func Connect() (db *sql.DB, err error) {
 		panic(fmt.Sprintf("Failed to read env file: %v", err))
 	}
 
-	host := env["host"]
-	password := env["password"]
-	port := 5432
-	user := env["user"]
-	dbname := env["dbname"]
+	if err != nil {
+		panic("failed to read env file")
+	}
+
+	host := utils.Invariant[string](env["host"], "missing `host` env variable")
+	password := utils.Invariant[string](env["password"], "missing `password` env variable")
+	port := utils.Invariant[string](env["port"], "missing `port` env variable")
+	user := utils.Invariant[string](env["user"], "missing `user` env variable")
+	dbname := utils.Invariant[string](env["dbname"], "missing `dbname` env variable")
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",

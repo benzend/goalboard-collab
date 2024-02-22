@@ -2,10 +2,12 @@ package models
 
 //// Create my own goals /CreateGoal Endpoint
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -23,21 +25,26 @@ type Goal struct {
 }
 
 // InsertGoalData inserts the goal data into the database and returns an error if any
-func InsertGoalData(g *Goal) error {
+func InsertGoalData(ctx context.Context, g *Goal) error {
+	db, ok := ctx.Value("db").(*sql.DB)
 
-	// // Prepare the SQL statement
-	// stmt, err := db.Prepare("INSERT INTO goals (Name, ID, Target, TargetPer, GoalProgress, ActivitiesPerGoal, CreatedAtDate, UpdatedAt) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)")
+	if !ok {
+		panic("failed to get db value")
+	}
 
-	// if err != nil {
-	// 	return err
-	// }
-	// defer stmt.Close()
+	// Prepare the SQL statement
+	stmt, err := db.Prepare("INSERT INTO goals (Name, ID, Target, TargetPer, GoalProgress, ActivitiesPerGoal, CreatedAtDate, UpdatedAt) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)")
 
-	// // Execute the SQL statement
-	// _, err = stmt.Exec(g.Name, g.ID, g.Target, g.TargetPer, g.GoalProgress, strings.Join(g.Activities, ", "), g.CreatedDateTime(), g.CreatedDateTime())
-	// if err != nil {
-	// 	return err
-	// }
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	// Execute the SQL statement
+	_, err = stmt.Exec(g.Name, g.ID, g.Target, g.TargetPer, g.GoalProgress, strings.Join(g.Activities, ", "), g.CreatedDateTime(), g.CreatedDateTime())
+	if err != nil {
+		return err
+	}
 
 	return nil
 
@@ -63,8 +70,11 @@ func (g *Goal) CreateUserGoals(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
+		// TODO: pass ctx into CreateUserGoals
+		ctx := context.Background()
+
 		// Insert the goal data into the database
-		err = InsertGoalData(&setGoal)
+		err = InsertGoalData(ctx, &setGoal)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

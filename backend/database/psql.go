@@ -27,7 +27,7 @@ func Connect() (db *sql.DB, err error) {
 	user := utils.Invariant[string](env["user"], "missing `user` env variable")
 	dbname := utils.Invariant[string](env["dbname"], "missing `dbname` env variable")
 
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
 

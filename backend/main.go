@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/benzend/goalboard/backend/database"
-	"github.com/benzend/goalboard/backend/models"
+	"github.com/benzend/goalboard/database"
+	"github.com/benzend/goalboard/models"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -124,7 +124,7 @@ func main() {
 
 	http.Handle("/goalprogress", authMiddleware(http.HandlerFunc(newGoal.GetGoalProgress)))
 
-	log.Println("Listening for requests at http://localhost:8000/")
+	log.Println("Listening for requests at http://0.0.0.0:8000/")
 
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	log.Fatal(http.ListenAndServe("0.0.0.0:8000", nil))
 }

@@ -1,0 +1,57 @@
+name: goalboard
+services:
+  frontend:
+    build:
+      context: frontend
+      target: development
+    ports:
+      - 5173:5173
+    volumes:
+      - ./frontend/src:/code/src:ro
+    networks:
+      - client-side
+
+  backend:
+    build:
+      context: backend
+      target: development
+    environment:
+      - ADDRESS=0.0.0.0:8000
+      - PG_DBNAME=postgres
+      - PG_HOST=db
+      - PG_USER=postgres
+      - PG_PASSWORD=mysecretpassword
+    volumes:
+      - ./backend/src:/code/src:ro
+    ports:
+      - 8000:8000
+    networks:
+      - server-side
+      - client-side
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=mysecretpassword
+    ports:
+      - 5432:5432
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - server-side
+    healthcheck:
+      test: ['CMD', 'pg_isready']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db-data: {}
+
+networks:
+  client-side: {}
+  server-side: {}

@@ -22,7 +22,7 @@ services:
       - PG_USER=postgres
       - PG_PASSWORD=mysecretpassword
     volumes:
-      - ./backend/src:/code/src:ro
+      - ./backend:/code:ro
     ports:
       - 8000:8000
     networks:

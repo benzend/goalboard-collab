@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -15,33 +16,68 @@ import (
 
 var jwtKey = []byte("secrect")
 
+type ctxKey string
+
 type JWTData struct {
 	jwt.Claims
 	CustomClaims map[string]string `json:"custom_claims"`
 }
 type User struct {
+	Id string `json:"id"`
 	Username string `json:"username"`
 }
 
-func loginHandler(w http.ResponseWriter, r *http.Request) {
-	var user User
-	err := json.NewDecoder(r.Body).Decode(&user)
+type LoginRequestBody struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type LoginReturnData struct {
+	Token string `json:"token"`
+	User User `json:"user"`
+}
+
+func loginHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
+	var body LoginRequestBody
+	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	if user.Username != "gwartney" {
-		http.Error(w, "Invalid username or password", http.StatusUnauthorized)
+
+	db, ok := ctx.Value(ctxKey("db")).(*sql.DB)
+
+	if !ok {
+		http.Error(w, "server error", http.StatusInternalServerError)
 		return
 	}
 
 	// Create a JWT token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": user.Username,
+		"username": body.Username,
 		"exp":      time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
 	})
+
 	tokenString, err := token.SignedString(jwtKey)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var getUserQuery = "SELECT username, id FROM user_ WHERE username = $1;"
+
+	var res = User{}
+	if err := db.QueryRow(getUserQuery, body.Username).Scan(&res.Username, &res.Id); err != nil {
+		log.Println("failed to get user", err)
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
+
+	payload, err := json.Marshal(LoginReturnData{ Token: tokenString, User: res })
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -62,8 +98,8 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"token": tokenString})
 
+	json.NewEncoder(w).Encode(payload)
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
@@ -101,6 +137,11 @@ func authMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func enableCors(w *http.ResponseWriter) {
+	log.Println("setting up cors")
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
+
 func main() {
 	var ctx = context.Background()
 	// Hello world, the web server
@@ -112,14 +153,96 @@ func main() {
 
 
 	// put the db value into the context to be used in fns
-	ctx = context.WithValue(ctx, "db", db)
+	ctx = context.WithValue(ctx, ctxKey("db"), db)
 
 	defer db.Close()
 
 	var newGoal models.Goal
 	var newUser models.User
 
-	http.HandleFunc("/login", loginHandler)
+	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
+		enableCors(&w)
+		var body LoginRequestBody
+		err := json.NewDecoder(r.Body).Decode(&body)
+	
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+	
+		db, ok := ctx.Value(ctxKey("db")).(*sql.DB)
+	
+		if !ok {
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
+		}
+	
+		var query = "INSERT INTO user_ (username, password) VALUES ($1, $2)"
+	
+		log.Println("inserting user...")
+
+		if _, err := db.Exec(query, body.Username, body.Password); err != nil {
+			log.Println("failed to insert user", err)
+
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
+		}
+
+		var getUserQuery = "SELECT (username, id) FROM user_ WHERE user_.username = ?"
+
+		var res = User{}
+		if err := db.QueryRow(getUserQuery, body.Username).Scan(res); err != nil {
+			log.Println("failed to get user", err)
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
+		}
+
+		// Create a JWT token
+		log.Println("getting token...")
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+			"username": body.Username,
+			"exp":      time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
+		})
+	
+		log.Println("getting signed string...")
+		tokenString, err := token.SignedString(jwtKey)
+	
+		if err != nil {
+			log.Println("failed to sign string")
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	
+		payload, err := json.Marshal(LoginReturnData{ Token: tokenString, User: res })
+	
+		if err != nil {
+			log.Println("failed to marshal")
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	
+		// Set the token in a cookie
+		expiration := time.Now().Add(24 * time.Hour)
+		cookie := http.Cookie{
+			Name:     "jwt_token",
+			Value:    tokenString,
+			Expires:  expiration,
+			HttpOnly: true,
+			Secure:   false, // Set to true if using HTTPS
+		}
+		http.SetCookie(w, &cookie)
+	
+		// Return success response
+		w.WriteHeader(http.StatusOK)
+	
+		w.Header().Set("Content-Type", "application/json")
+	
+		json.NewEncoder(w).Encode(payload)
+	})
+
+	http.HandleFunc("/login", func(w http.ResponseWriter, req *http.Request) {
+		loginHandler(ctx, w, req)
+	})
 
 	http.HandleFunc("/logout", logoutHandler)
 

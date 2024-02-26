@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/benzend/goalboard/backend/models"
+	"github.com/benzend/goalboard/models"
 )
 
 func enableCors(w *http.ResponseWriter) {

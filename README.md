@@ -14,27 +14,54 @@ https://www.figma.com/file/WlrtJXxCnsjjGGoJaYPqCk/Goalboard?type=design&node-id=
 
 - GoLang
 - React (Vite) with TypeScript
+- Docker
 
 ## Development
 
-### Steps for setup
+### Setup
 
-- Install [Go](https://go.dev/doc/install)
-- Install Nodejs (I like to use [NVM](https://github.com/nvm-sh/nvm))
-- Install Go binaries `cd backend && go install`
-- Install NodeJS packages (after going back to root) `cd frontend && npm i`
+Copy over your .env.example files and rename them as .env.
+
+Ex:
+
+```bash
+cp ./backend/.env.example ./backend/.env
+```
+
+Make sure to update the variables in there if needed!
+
+Install docker and docker compose if you haven't already:
+
+https://www.docker.com/get-started/
+
+After that we can create the containers:
+
+```bash
+docker compose build
+```
+
+And then run them in the backround:
+
+```bash
+docker compose up -d
+```
 
 ### Migrations
 
-Before you get started, you'll want to migrate the database. Right now we're doing this manually. The command looks something like this:
+Before you get started, you'll want to migrate the database. Right now we're doing this manually. The process will look something like this:
+
+Go into the backend container:
 
 ```bash
-psql -U postgres -d postgres -a -f ~/<path-to-project>/backend/database/migrations/<my-migration-file>.up.sql
+docker exec -it goalboard-backend-1 sh
 ```
 
-Make sure to replace and use the correct settings for your current project setup!
+Run each migration. The command per file looks something like this:
 
-### Steps for running
+```bash
+psql postgres://postgres:<password>@db/postgres -a -f /code/database/migrations/<my-migration-file>.up.sql
+```
 
-- While in /frontend `npm run dev`
-- While in /backend `go run main.go`
+We'll need to figure out a out to manage our migrations to make this a bit easier.
+
+PS: Make sure to replace and use the correct settings for your current project setup!

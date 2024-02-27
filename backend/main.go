@@ -7,11 +7,13 @@ import (
 	"log"
 	"net/http"
 	"time"
-
+	"fmt"
 	"github.com/benzend/goalboard/database"
 	"github.com/benzend/goalboard/models"
 	"github.com/benzend/goalboard/routes"
 	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/bcrypt"
+
 )
 
 var jwtKey = []byte("secrect")
@@ -32,10 +34,27 @@ type LoginRequestBody struct {
 	Password string `json:"password"`
 }
 
+
+
 type LoginReturnData struct {
 	Token string `json:"token"`
 	User User `json:"user"`
 }
+
+
+
+//Hash user password from body
+func HashPassword(password string) (string, error) {
+    bytes, err := bcrypt.GenerateFromPassword([]byte(password), 5)
+    return string(bytes), err
+}
+
+func CheckPasswordHash(password, hash string) bool {
+    err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+    return err == nil
+}
+
+
 
 func loginHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
@@ -117,6 +136,7 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func authMiddleware(next http.Handler) http.Handler {
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tokenString := r.Header.Get("Authorization")
 
@@ -158,12 +178,18 @@ func main() {
 	defer db.Close()
 
 	var newGoal models.Goal
-	var newUser models.User
+	// var newUser models.User
 
 	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
+
 		enableCors(&w)
+
 		var body LoginRequestBody
+
+
+
 		err := json.NewDecoder(r.Body).Decode(&body)
+
 	
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -176,12 +202,20 @@ func main() {
 			http.Error(w, "server error", http.StatusInternalServerError)
 			return
 		}
+
+		password := body.Password
+		hash, _ := HashPassword(password) // ignore error for the sake of simplicity
+	
+		
+	
+		match := CheckPasswordHash(password, hash)
+		fmt.Println("Match:   ", match)
 	
 		var query = "INSERT INTO user_ (username, password) VALUES ($1, $2)"
 	
 		log.Println("inserting user...")
 
-		if _, err := db.Exec(query, body.Username, body.Password); err != nil {
+		if _, err := db.Exec(query, body.Username, hash); err != nil {
 			log.Println("failed to insert user", err)
 
 			http.Error(w, "server error", http.StatusInternalServerError)
@@ -245,8 +279,6 @@ func main() {
 	})
 
 	http.HandleFunc("/logout", logoutHandler)
-
-	http.Handle("/CreateUser", http.HandlerFunc(newUser.CreateUser))
 
 	// http.Handle("/goals", authMiddleware(http.HandlerFunc(newGoal.CreateUserGoals)))
 

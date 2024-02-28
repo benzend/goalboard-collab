@@ -4,16 +4,16 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
-	"fmt"
+
 	"github.com/benzend/goalboard/database"
 	"github.com/benzend/goalboard/models"
 	"github.com/benzend/goalboard/routes"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
-
 )
 
 var jwtKey = []byte("secrect")

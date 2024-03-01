@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -16,24 +17,55 @@ import (
 var db *sql.DB
 
 type Goal struct {
-	ID           string   `json:"Id"`
-	Name         string   `json:"username"`
-	Target       string   `json:"target"`
-	TargetPer    string   `json:"targetPer"`
-	GoalProgress string   `json:"percentage"`
-	Activities   []string `json:"ActivityList"`
-}
-
+	// unique id
+	ID           string    `json:"id"`
+  
+	// data
+	Name         string    `json:"name"`
+	Target       string    `json:"target"`
+	TargetPer    string    `json:"target_per"`
+  }
+  
+  type Activity struct {
+	// unique id
+	ID        string       `json:"id"`
+  
+	// data
+	Progress  string       `json:"progress"`
+	
+	// references
+	GoalID    string       `json:"goal_id"`
+  }
 // InsertGoalData inserts the goal data into the database and returns an error if any
 func InsertGoalData(ctx context.Context, g *Goal) error {
-	db, ok := ctx.Value("db").(*sql.DB)
+	type ctxKey string
+
+	db, ok := ctx.Value(ctxKey("db")).(*sql.DB)
+
+	var query = "INSERT INTO user_ (username, password) VALUES ($1, $2)"
+
+	log.Println("inserting user...")
+
+	if _, err := db.Exec(query, body.Username, hash); err != nil {
+		log.Println("failed to insert user", err)
+
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
 
 	if !ok {
 		panic("failed to get db value")
 	}
 
+
+	var query = "INSERT INTO goals (username, password) VALUES ($1, $2)"
 	// Prepare the SQL statement
-	stmt, err := db.Prepare("INSERT INTO goals (Name, ID, Target, TargetPer, GoalProgress, ActivitiesPerGoal, CreatedAtDate, UpdatedAt) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)")
+	var stmt = "INSERT INTO goals 
+	(Name, 
+	Target, TargetPer, 
+	GoalProgress, ActivitiesPerGoal, 
+	CreatedAtDate, UpdatedAt) 
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
 
 	if err != nil {
 		return err
@@ -58,43 +90,11 @@ func (g *Goal) CreatedDateTime() string {
 func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }
-func (g *Goal) CreateUserGoals(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	switch req.Method {
-	case http.MethodPost:
-		var setGoal Goal
-		err := json.NewDecoder(req.Body).Decode(&setGoal)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		// TODO: pass ctx into CreateUserGoals
-		ctx := context.Background()
-
-		// Insert the goal data into the database
-		err = InsertGoalData(ctx, &setGoal)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		jsonResponse, err := json.Marshal("Success")
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Write(jsonResponse)
-
-	default:
-		return
-	}
-}
 
 func (g *Goal) GetActivtiesListPerGoal(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
+
 	enableCors(&w)
 
 	switch req.Method {

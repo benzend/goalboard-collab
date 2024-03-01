@@ -7,13 +7,11 @@ import (
 	"log"
 	"net/http"
 	"time"
-	"fmt"
+
 	"github.com/benzend/goalboard/database"
-	"github.com/benzend/goalboard/models"
 	"github.com/benzend/goalboard/routes"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
-
 )
 
 var jwtKey = []byte("secrect")
@@ -25,7 +23,7 @@ type JWTData struct {
 	CustomClaims map[string]string `json:"custom_claims"`
 }
 type User struct {
-	Id string `json:"id"`
+	Id       string `json:"id"`
 	Username string `json:"username"`
 }
 
@@ -34,42 +32,60 @@ type LoginRequestBody struct {
 	Password string `json:"password"`
 }
 
-
-
 type LoginReturnData struct {
 	Token string `json:"token"`
-	User User `json:"user"`
+	User  User   `json:"user"`
 }
 
+func enableCors(w *http.ResponseWriter) {
+	log.Println("setting up cors")
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
 
-
-//Hash user password from body
+// Hash user password from body
 func HashPassword(password string) (string, error) {
-    bytes, err := bcrypt.GenerateFromPassword([]byte(password), 5)
-    return string(bytes), err
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 5)
+	return string(bytes), err
 }
 
 func CheckPasswordHash(password, hash string) bool {
-    err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-    return err == nil
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }
-
-
 
 func loginHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
-	var body LoginRequestBody
-	err := json.NewDecoder(r.Body).Decode(&body)
 
+	var body LoginRequestBody
+
+	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	db, ok := ctx.Value(ctxKey("db")).(*sql.DB)
-
 	if !ok {
 		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
+
+	// Retrieve hashed password from the database based on the provided username
+	var hashedPassword string
+	var userId string // Assuming userId is needed for other purposes
+	var getUserQuery = "SELECT password, id FROM user_ WHERE username = $1;"
+
+	err = db.QueryRow(getUserQuery, body.Username).Scan(&hashedPassword, &userId)
+	if err != nil {
+		log.Println("failed to get user", err)
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
+
+	// Compare the provided password with the hashed password from the database
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(body.Password))
+	if err != nil {
+		http.Error(w, "invalid username or password", http.StatusUnauthorized)
 		return
 	}
 
@@ -80,23 +96,6 @@ func loginHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	})
 
 	tokenString, err := token.SignedString(jwtKey)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	var getUserQuery = "SELECT username, id FROM user_ WHERE username = $1;"
-
-	var res = User{}
-	if err := db.QueryRow(getUserQuery, body.Username).Scan(&res.Username, &res.Id); err != nil {
-		log.Println("failed to get user", err)
-		http.Error(w, "server error", http.StatusInternalServerError)
-		return
-	}
-
-	payload, err := json.Marshal(LoginReturnData{ Token: tokenString, User: res })
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -115,10 +114,18 @@ func loginHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 
 	// Return success response
 	w.WriteHeader(http.StatusOK)
-
 	w.Header().Set("Content-Type", "application/json")
 
-	json.NewEncoder(w).Encode(payload)
+	// Return the JWT token and user data
+	responseData := LoginReturnData{
+		Token: tokenString,
+		User: User{
+			Id:       userId,
+			Username: body.Username,
+			// You may add more fields as needed
+		},
+	}
+	json.NewEncoder(w).Encode(responseData)
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
@@ -157,11 +164,6 @@ func authMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func enableCors(w *http.ResponseWriter) {
-	log.Println("setting up cors")
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
-}
-
 func main() {
 	var ctx = context.Background()
 	// Hello world, the web server
@@ -171,14 +173,12 @@ func main() {
 		panic(err)
 	}
 
-
 	// put the db value into the context to be used in fns
 	ctx = context.WithValue(ctx, ctxKey("db"), db)
 
 	defer db.Close()
 
-	var newGoal models.Goal
-	// var newUser models.User
+	// var newGoal models.Goal
 
 	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 
@@ -186,18 +186,15 @@ func main() {
 
 		var body LoginRequestBody
 
-
-
 		err := json.NewDecoder(r.Body).Decode(&body)
 
-	
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-	
+
 		db, ok := ctx.Value(ctxKey("db")).(*sql.DB)
-	
+
 		if !ok {
 			http.Error(w, "server error", http.StatusInternalServerError)
 			return
@@ -205,14 +202,9 @@ func main() {
 
 		password := body.Password
 		hash, _ := HashPassword(password) // ignore error for the sake of simplicity
-	
-		
-	
-		match := CheckPasswordHash(password, hash)
-		fmt.Println("Match:   ", match)
-	
+
 		var query = "INSERT INTO user_ (username, password) VALUES ($1, $2)"
-	
+
 		log.Println("inserting user...")
 
 		if _, err := db.Exec(query, body.Username, hash); err != nil {
@@ -237,24 +229,24 @@ func main() {
 			"username": body.Username,
 			"exp":      time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
 		})
-	
+
 		log.Println("getting signed string...")
 		tokenString, err := token.SignedString(jwtKey)
-	
+
 		if err != nil {
 			log.Println("failed to sign string")
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-	
-		payload, err := json.Marshal(LoginReturnData{ Token: tokenString, User: res })
-	
+
+		payload, err := json.Marshal(LoginReturnData{Token: tokenString, User: res})
+
 		if err != nil {
 			log.Println("failed to marshal")
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-	
+
 		// Set the token in a cookie
 		expiration := time.Now().Add(24 * time.Hour)
 		cookie := http.Cookie{
@@ -265,30 +257,28 @@ func main() {
 			Secure:   false, // Set to true if using HTTPS
 		}
 		http.SetCookie(w, &cookie)
-	
+
 		// Return success response
 		w.WriteHeader(http.StatusOK)
-	
+
 		w.Header().Set("Content-Type", "application/json")
-	
+
 		json.NewEncoder(w).Encode(payload)
 	})
 
-	http.HandleFunc("/login", func(w http.ResponseWriter, req *http.Request) {
+	http.Handle("/login", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		loginHandler(ctx, w, req)
-	})
+	}))
 
 	http.HandleFunc("/logout", logoutHandler)
-
-	// http.Handle("/goals", authMiddleware(http.HandlerFunc(newGoal.CreateUserGoals)))
 
 	http.Handle("/goals", authMiddleware(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		routes.Goals(ctx, w, req)
 	})))
 
-	http.Handle("/ActivityList", authMiddleware(http.HandlerFunc(newGoal.GetActivtiesListPerGoal)))
+	// http.Handle("/ActivityList", authMiddleware(http.HandlerFunc(newGoal.GetActivtiesListPerGoal)))
 
-	http.Handle("/goalprogress", authMiddleware(http.HandlerFunc(newGoal.GetGoalProgress)))
+	// http.Handle("/goalprogress", authMiddleware(http.HandlerFunc(newGoal.GetGoalProgress)))
 
 	log.Println("Listening for requests at http://0.0.0.0:8000/")
 

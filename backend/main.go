@@ -109,11 +109,13 @@ func loginHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		Expires:  expiration,
 		HttpOnly: true,
 		Secure:   false, // Set to true if using HTTPS
+		Path:     "/goals",
 	}
 	http.SetCookie(w, &cookie)
 
 	// Return success response
 	w.WriteHeader(http.StatusOK)
+
 	w.Header().Set("Content-Type", "application/json")
 
 	// Return the JWT token and user data
@@ -122,7 +124,6 @@ func loginHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		User: User{
 			Id:       userId,
 			Username: body.Username,
-			// You may add more fields as needed
 		},
 	}
 	json.NewEncoder(w).Encode(responseData)
@@ -141,17 +142,18 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
-
 func authMiddleware(next http.Handler) http.Handler {
-
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tokenString := r.Header.Get("Authorization")
-
-		if tokenString == "" {
+		// Retrieve JWT token from the cookie
+		cookie, err := r.Cookie("jwt_token")
+		if err != nil {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 
+		tokenString := cookie.Value
+
+		// Parse JWT token
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return jwtKey, nil
 		})
@@ -255,6 +257,7 @@ func main() {
 			Expires:  expiration,
 			HttpOnly: true,
 			Secure:   false, // Set to true if using HTTPS
+
 		}
 		http.SetCookie(w, &cookie)
 

@@ -109,7 +109,7 @@ func loginHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		Expires:  expiration,
 		HttpOnly: true,
 		Secure:   false, // Set to true if using HTTPS
-		Path:     "/goals",
+		Path:     "/",
 	}
 	http.SetCookie(w, &cookie)
 
@@ -142,6 +142,7 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
+
 func authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Retrieve JWT token from the cookie
@@ -275,9 +276,9 @@ func main() {
 
 	http.HandleFunc("/logout", logoutHandler)
 
-	http.Handle("/goals", authMiddleware(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+	http.Handle("/goals", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		routes.Goals(ctx, w, req)
-	})))
+	}))
 
 	// http.Handle("/ActivityList", authMiddleware(http.HandlerFunc(newGoal.GetActivtiesListPerGoal)))
 

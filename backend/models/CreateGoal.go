@@ -1,59 +1,23 @@
 package models
 
 //// Create my own goals /CreateGoal Endpoint
-import (
-	"context"
-	"database/sql"
+// import (
+// 	_ "github.com/lib/pq"
+// )
 
-	"time"
+// type Activity struct {
 
-	_ "github.com/lib/pq"
-)
+// 	// data
+// 	Progress string `json:"progress"`
 
-type Goal struct {
-	// unique id
-	ID             string `json:"id"`
-	Name           string `json:"name"`
-	LongTermTarget string `json:"target"`
-	TargetPerDay   string `json:"target_per"`
-}
+// 	// references
+// 	GoalID string `json:"goal_id"`
+// }
 
-type Activity struct {
-	// unique id
-	ID string `json:"id"`
-
-	// data
-	Progress string `json:"progress"`
-
-	// references
-	GoalID string `json:"goal_id"`
-}
-
-// / InsertGoalData inserts the goal data into the database and returns an error if any
-func InsertGoalData(ctx context.Context, db *sql.DB, g *Goal, username string) error {
-	// First, let's retrieve the user's ID using their username
-
-	var userID int
-	err := db.QueryRowContext(ctx, "SELECT id FROM user_ WHERE username = $1", username).Scan(&userID)
-
-	if err != nil {
-		return err
-	}
-
-	// Now that we have the userID, we can insert the goal data into the database
-	query := "INSERT INTO goals_ (Name, TargetPerDay, LongTermTarget, user_id) VALUES ($1, $2, $3, $4)"
-	_, err = db.ExecContext(ctx, query, g.Name, g.TargetPerDay, g.LongTermTarget, userID)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (g *Goal) CreatedDateTime() string {
-	dt := time.Now()
-	return dt.Format("01-02-2006 15:04:05")
-}
+// func (g *Goal) CreatedDateTime() string {
+// 	dt := time.Now()
+// 	return dt.Format("01-02-2006 15:04:05")
+// }
 
 // func (g *Goal) GetActivtiesListPerGoal(w http.ResponseWriter, req *http.Request) {
 

@@ -4,13 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
+
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/benzend/goalboard/database"
 	"github.com/benzend/goalboard/routes"
+	"github.com/benzend/goalboard/utils"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -19,10 +20,6 @@ var jwtKey = []byte("secrect")
 
 type ctxKey string
 
-type JWTData struct {
-	jwt.Claims
-	CustomClaims map[string]string `json:"custom_claims"`
-}
 type User struct {
 	Id       string `json:"id"`
 	Username string `json:"username"`
@@ -31,11 +28,6 @@ type User struct {
 type LoginRequestBody struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
-}
-
-type LoginReturnData struct {
-	Token string `json:"token"`
-	User  User   `json:"user"`
 }
 
 func enableCors(w *http.ResponseWriter) {
@@ -55,17 +47,20 @@ func CheckPasswordHash(password, hash string) bool {
 }
 
 func loginHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	enableCors(&w)
+
+	utils.EnableCors(&w)
 
 	var body LoginRequestBody
 
 	err := json.NewDecoder(r.Body).Decode(&body)
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	db, ok := ctx.Value(ctxKey("db")).(*sql.DB)
+
 	if !ok {
 		http.Error(w, "server error", http.StatusInternalServerError)
 		return
@@ -280,10 +275,6 @@ func main() {
 	http.Handle("/goals", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		routes.Goals(ctx, w, req)
 	}))
-
-	// http.Handle("/ActivityList", authMiddleware(http.HandlerFunc(newGoal.GetActivtiesListPerGoal)))
-
-	// http.Handle("/goalprogress", authMiddleware(http.HandlerFunc(newGoal.GetGoalProgress)))
 
 	log.Println("Listening for requests at http://0.0.0.0:8000/")
 

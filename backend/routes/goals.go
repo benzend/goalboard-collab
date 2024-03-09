@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
+	"github.com/benzend/goalboard/utils/"
 	"github.com/benzend/goalboard/database"
 	"github.com/golang-jwt/jwt/v5"
 	_ "github.com/lib/pq"
@@ -20,13 +20,9 @@ type setGoal struct {
 
 var hmacSampleSecret = []byte("secrect")
 
-func enableCors(w *http.ResponseWriter) {
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
-}
 
 func Goals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
-	enableCors(&w)
-	enableCors(&w)
+	HelperMethods.enableCors(&w)
 
 	var body setGoal
 

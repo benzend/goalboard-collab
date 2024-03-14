@@ -26,7 +26,7 @@ func enableCors(w *http.ResponseWriter) {
 
 func Goals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 	enableCors(&w)
-	enableCors(&w)
+ 
 
 	var body setGoal
 

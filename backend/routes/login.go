@@ -15,7 +15,6 @@ import (
 
 
 func Login(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-
 	utils.EnableCors(&w)
 
 	var body LoginRequestBody

@@ -5,20 +5,20 @@ import (
 	"net/http"
 )
 
-type Router struct {
+type router struct {
 	routes map[string]RouteMethod
 	paths map[string]bool
 	ctx context.Context
 }
 
-func NewRouter() Router {
-	return Router {
+func NewRouter() router {
+	return router {
 		routes: make(map[string]RouteMethod),
 		paths: make(map[string]bool),
 	}
 }
 
-func (r* Router) Get(path string, handle Handle) {
+func (r* router) Get(path string, handle Handle) {
 	if routes, ok := r.routes[path]; ok {
 		routes.Get = handle
 	} else {
@@ -27,7 +27,7 @@ func (r* Router) Get(path string, handle Handle) {
 	r.paths[path] = true
 }
 
-func (r* Router) Post(path string, handle Handle) {
+func (r* router) Post(path string, handle Handle) {
 	if routes, ok := r.routes[path]; ok {
 		routes.Post = handle
 	} else {
@@ -36,7 +36,7 @@ func (r* Router) Post(path string, handle Handle) {
 	r.paths[path] = true
 }
 
-func (r* Router) Put(path string, handle Handle) {
+func (r* router) Put(path string, handle Handle) {
 	if routes, ok := r.routes[path]; ok {
 		routes.Put = handle
 	} else {
@@ -45,7 +45,7 @@ func (r* Router) Put(path string, handle Handle) {
 	r.paths[path] = true
 }
 
-func (r* Router) Delete(path string, handle Handle) {
+func (r* router) Delete(path string, handle Handle) {
 	if routes, ok := r.routes[path]; ok {
 		routes.Delete = handle
 	} else {
@@ -54,11 +54,11 @@ func (r* Router) Delete(path string, handle Handle) {
 	r.paths[path] = true
 }
 
-func (r* Router) Ctx(ctx context.Context) {
+func (r* router) Ctx(ctx context.Context) {
 	r.ctx = ctx
 }
 
-func (router* Router) Build() {
+func (router* router) Build() {
 	for k := range router.paths {
 		path := k
 		routesInPath, ok := router.routes[path]

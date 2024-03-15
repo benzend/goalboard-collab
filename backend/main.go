@@ -54,13 +54,17 @@ func main() {
 	defer db.Close()
 
 	// var newGoal models.Goal
-	router := router.Router {}
+	router := router.NewRouter()
 	router.Ctx(ctx)
 
 	router.Post("/register", routes.Register)
 	router.Post("/login", routes.Login)
 	router.Post("/logout", routes.Logout)
 	// router.Get("/goals", func())
+
+	router.Get("/healthcheck", routes.HealthCheck)
+
+	router.Build()
 
 	log.Println("Listening for requests at http://0.0.0.0:8000/")
 

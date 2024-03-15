@@ -6,44 +6,51 @@ import (
 )
 
 type Router struct {
-	routes map[string][]Handler
+	routes map[string]RouteMethod
 	paths map[string]bool
 	ctx context.Context
 }
 
-func (r* Router) Get(path string, handle Handle) {
-	handler := Handler {
-		Handle: handle,
-		Method: "GET",
+func NewRouter() Router {
+	return Router {
+		routes: make(map[string]RouteMethod),
+		paths: make(map[string]bool),
 	}
-	r.routes[path] = append(r.routes[path], handler)
+}
+
+func (r* Router) Get(path string, handle Handle) {
+	if routes, ok := r.routes[path]; ok {
+		routes.Get = handle
+	} else {
+		r.routes[path] = RouteMethod{ Get: handle }
+	}
 	r.paths[path] = true
 }
 
 func (r* Router) Post(path string, handle Handle) {
-	handler := Handler {
-		Handle: handle,
-		Method: "POST",
+	if routes, ok := r.routes[path]; ok {
+		routes.Post = handle
+	} else {
+		r.routes[path] = RouteMethod{ Post: handle }
 	}
-	r.routes[path] = append(r.routes[path], handler)
 	r.paths[path] = true
 }
 
 func (r* Router) Put(path string, handle Handle) {
-	handler := Handler {
-		Handle: handle,
-		Method: "PUT",
+	if routes, ok := r.routes[path]; ok {
+		routes.Put = handle
+	} else {
+		r.routes[path] = RouteMethod{ Put: handle }
 	}
-	r.routes[path] = append(r.routes[path], handler)
 	r.paths[path] = true
 }
 
 func (r* Router) Delete(path string, handle Handle) {
-	handler := Handler {
-		Handle: handle,
-		Method: "DELETE",
+	if routes, ok := r.routes[path]; ok {
+		routes.Delete = handle
+	} else {
+		r.routes[path] = RouteMethod{ Delete: handle }
 	}
-	r.routes[path] = append(r.routes[path], handler)
 	r.paths[path] = true
 }
 
@@ -54,14 +61,34 @@ func (r* Router) Ctx(ctx context.Context) {
 func (router* Router) Build() {
 	for k := range router.paths {
 		path := k
-		routesInPath := router.routes[path]
+		routesInPath, ok := router.routes[path]
+
+		if !ok {
+			panic("idk what the hell you did, but it aint working")
+		}
 
 		http.HandleFunc(path, func(w http.ResponseWriter, r* http.Request) {
-			for i := 0; i < len(routesInPath); i++ {
-				route := routesInPath[i]
-
-				if r.Method == route.Method {
-					route.Handle(router.ctx, w, r)
+			if routesInPath.Get != nil {
+				if r.Method == http.MethodGet {
+					routesInPath.Get(router.ctx, w, r)
+					return
+				}
+			}
+			if routesInPath.Post != nil {
+				if r.Method == http.MethodPost {
+					routesInPath.Post(router.ctx, w, r)
+					return
+				}
+			}
+			if routesInPath.Put != nil {
+				if r.Method == http.MethodPut {
+					routesInPath.Put(router.ctx, w, r)
+					return
+				}
+			}
+			if routesInPath.Delete != nil {
+				if r.Method == http.MethodDelete {
+					routesInPath.Delete(router.ctx, w, r)
 					return
 				}
 			}
@@ -79,6 +106,13 @@ type Route struct {
 type Handler struct {
 	Method string
 	Handle Handle
+}
+
+type RouteMethod struct {
+	Get Handle
+	Post Handle
+	Put Handle
+	Delete Handle
 }
 
 type Handle func(ctx context.Context, w http.ResponseWriter, r* http.Request)

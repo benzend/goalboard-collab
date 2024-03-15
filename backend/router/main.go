@@ -132,16 +132,6 @@ func (router* router) Build() {
 	}
 }
 
-type Route struct {
-	Path string
-	Handlers []Handler
-}
-
-type Handler struct {
-	Method string
-	Handle Handle
-}
-
 type RouteMethod struct {
 	Get Handle
 	Post Handle

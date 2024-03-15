@@ -5,14 +5,45 @@ import (
 	"net/http"
 )
 
+// `router` is private to force users to use Builder methods like `NewRouter`
 type router struct {
+
+	// using maps to have the paths be the route key to make
+	// things more performant and reduce amount of code
+
+	// example routes map:
+	// {
+	//   "/goals": {
+	//      Get: func(),
+	//      Post: func(),
+	//   },
+	//   "/login": {
+	//      Post: func(),
+	//   },
+	//   etc...
+
+	// as you can see it's easier to now get the routes based on
+	// a particular path:
+
+	// goalsPath := "/goals"
+	// goalMethods := router.routes[goalsPath]
+	// getGoals := goalMethods.Get
+
 	routes map[string]RouteMethod
+
+	// paths here is used similarly to above. however, it's more of a way to quickly index
+	// all paths for the `Build` method below. It also and more importantly makes the logic
+	// more understandable
+
 	paths map[string]bool
+
+	// storing the context for injecting into all of our RouteMethods on `Build`
 	ctx context.Context
 }
 
 func NewRouter() router {
 	return router {
+		// maps need to be initialized in order for them to be usable
 		routes: make(map[string]RouteMethod),
 		paths: make(map[string]bool),
 	}
@@ -58,7 +89,10 @@ func (r* router) Ctx(ctx context.Context) {
 	r.ctx = ctx
 }
 
+// ! the final sendoff - always make sure to run this at the very end
+// ! otherwise you'll wonder why your routes aren't working
 func (router* router) Build() {
+	// remember how i said router.paths are used for indexing? here u go
 	for k := range router.paths {
 		path := k
 		routesInPath, ok := router.routes[path]

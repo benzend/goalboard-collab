@@ -63,7 +63,7 @@ func Register(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var getUserQuery = "SELECT (username, id) FROM user_ WHERE user_.username = ?"
+		var getUserQuery = "SELECT (username, id) FROM user_ WHERE username = $1"
 
 		var res = User{}
 		if err := db.QueryRow(getUserQuery, body.Username).Scan(res); err != nil {

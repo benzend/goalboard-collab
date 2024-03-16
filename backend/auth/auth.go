@@ -17,7 +17,7 @@ type user struct {
 }
 
 func Authorize(ctx context.Context, w http.ResponseWriter, req *http.Request) (user user, err error) {
-	    // Parse and validate the JWT token from the cookie
+	// Parse and validate the JWT token from the cookie
 	sessionInfo, err := req.Cookie("jwt_token")
 	if err != nil {
 		http.Error(w, "no cookie", http.StatusUnauthorized)
@@ -66,7 +66,7 @@ func Authorize(ctx context.Context, w http.ResponseWriter, req *http.Request) (u
 		return
 	}
 
-	query := "SELECT (id, username) FROM user_ WHERE id = $1"
+	query := "SELECT (id, username) FROM user_ WHERE id = $1;"
 
 	err = db.QueryRow(query, userID).Scan(&user)
 

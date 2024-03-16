@@ -76,7 +76,7 @@ func GetGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	query := "SELECT (id, name, target_per_day, long_term_target) FROM goal WHERE user_id = $1"
+	query := "SELECT goal_id, name, target_per_day, long_term_target FROM goal WHERE user_id = $1"
 
 	type Goal struct {
 		ID string `json:"id"`
@@ -103,8 +103,10 @@ func GetGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	json.NewEncoder(w).Encode(goals)
+	type Res struct {
+		Goals []Goal `json:"goals"`
+	}
+	json.NewEncoder(w).Encode(Res{ Goals: goals })
 	// If everything is fine, send a success response
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, "Goal data grabbed")
 }

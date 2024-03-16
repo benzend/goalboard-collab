@@ -27,12 +27,8 @@ func Authorize(ctx context.Context, w http.ResponseWriter, req *http.Request) (u
 	tokenString := sessionInfo.Value
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			// Validate the signing method
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-					return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-			}
 			// Return the byte array representation of the secret key
-			return utils.GetJwtSecret(), nil
+			return []byte(utils.GetJwtSecret()), nil
 	})
 
 	if err != nil {
@@ -50,11 +46,11 @@ func Authorize(ctx context.Context, w http.ResponseWriter, req *http.Request) (u
 		return
 	}
 
-	userID, ok := claims["user_id"]
+	username, ok := claims["username"]
 
 	if !ok {
-		http.Error(w, "no user ID", http.StatusUnauthorized)
-		err = fmt.Errorf("no user ID")
+		http.Error(w, "internal server error", http.StatusUnauthorized)
+		err = fmt.Errorf("no username (this shouldn't happen)")
 		return
 	}
 
@@ -66,9 +62,9 @@ func Authorize(ctx context.Context, w http.ResponseWriter, req *http.Request) (u
 		return
 	}
 
-	query := "SELECT (id, username) FROM user_ WHERE id = $1;"
+	query := "SELECT id, username FROM user_ WHERE username = $1;"
 
-	err = db.QueryRow(query, userID).Scan(&user)
+	err = db.QueryRow(query, username).Scan(&user.ID, &user.Username)
 
 	if err != nil {
 		http.Error(w, "failed to get user", http.StatusInternalServerError)

@@ -58,7 +58,7 @@ func Login(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		"exp":      time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
 	})
 
-	tokenString, err := token.SignedString(jwtKey)
+	tokenString, err := token.SignedString(utils.GetJwtSecret())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -28,8 +28,6 @@ type User struct {
 	Username string `json:"username"`
 }
 
-var jwtKey = []byte("secrect")
-
 func Register(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		utils.EnableCors(&w)
 
@@ -63,10 +61,10 @@ func Register(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var getUserQuery = "SELECT (username, id) FROM user_ WHERE username = $1"
+		var getUserQuery = "SELECT username, id FROM user_ WHERE username = $1"
 
-		var res = User{}
-		if err := db.QueryRow(getUserQuery, body.Username).Scan(res); err != nil {
+		var res User
+		if err := db.QueryRow(getUserQuery, body.Username).Scan(&res.Id, &res.Username); err != nil {
 			log.Println("failed to get user", err)
 			http.Error(w, "server error", http.StatusInternalServerError)
 			return
@@ -80,7 +78,7 @@ func Register(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		})
 
 		log.Println("getting signed string...")
-		tokenString, err := token.SignedString(jwtKey)
+		tokenString, err := token.SignedString(utils.GetJwtSecret())
 
 		if err != nil {
 			log.Println("failed to sign string")

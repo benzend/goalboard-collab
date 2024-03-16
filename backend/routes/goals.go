@@ -206,10 +206,9 @@ func UpdateGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) 
 
 
 
-//NEEDS TESTING STILL STOPING HERE FOR THE DAY
+
 func DeleteGoalAndActivities(ctx context.Context, w http.ResponseWriter, req *http.Request) {
- 
-	enableCors(&w)
+    enableCors(&w)
 
     var body setGoal
 
@@ -221,53 +220,124 @@ func DeleteGoalAndActivities(ctx context.Context, w http.ResponseWriter, req *ht
     }
     defer db.Close()
 
-    // Begin a transaction to ensure atomicity
-    tx, err := db.Begin()
-    if err != nil {
-        HandleError(err, "Failed to begin transaction", w)
-        return
-    }
-    defer tx.Rollback() // Rollback the transaction if not committed
+  
+    updateGoalID := body.GoalId  
 
-    // Delete associated activity records
-    deleteActivitiesQuery := `
-        DELETE FROM activity_
-        WHERE goal_id = $1
+ 
+    DeleteGoals :=`
+		DELETE FROM goals_
+		WHERE goalId = $1
     `
-    _, err = tx.Exec(deleteActivitiesQuery, goalID)
+
+    // Execute the update query for goals_
+    _, err = db.Exec(DeleteGoals,updateGoalID)
     if err != nil {
-        HandleError(err, "Failed to delete activities", w)
+        HandleError(err, "Failed to update goal data", w)
         return
     }
+ 
 
-    // Delete the goal record
-    deleteGoalQuery := `
-        DELETE FROM goals_
-        WHERE goalId = $1
-    `
-    _, err = tx.Exec(deleteGoalQuery, goalID)
-    if err != nil {
-        HandleError(err, "Failed to delete goal", w)
-        return
-    }
-
-    // Commit the transaction
-    err = tx.Commit()
-    if err != nil {
-        HandleError(err, "Failed to commit transaction", w)
-        return
-    }
-
-    // Respond with success message
+    // Use http.StatusOK for updates
     w.WriteHeader(http.StatusOK)
-    fmt.Fprintln(w, "Goal and associated activities deleted successfully")
+    fmt.Fprintln(w, "Goal and related activities updated successfully")
+}
+ 
+
+func selectAllGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
+    enableCors(&w)
+
+    var body setGoal
+
+    // Connect to the database
+    db, err := ConnectAndGetResponse(w, req, &body)
+    if err != nil {
+        HandleError(err, "Failed to connect", w)
+        return
+    }
+    defer db.Close()
+ 
+	query:= `
+			SELECT 
+			goals_.*, 
+			activity_.*
+		FROM 
+			goals_ 
+		JOIN 
+			activity_ ON goals_.goalId = activity_.goal_id;
+		
+	`
+
+	goalId := body.GoalId  
+
+    rows, err := db.Query(query)
+
+	
+    if err != nil {
+        panic(err)
+    }
+    defer rows.Close()
+	
+	if err != nil {
+        HandleError(err, "Failed to select info", w)
+        return
+    }
+ 
+
+    // Use http.StatusOK for updates
+    w.WriteHeader(http.StatusOK)
+    fmt.Fprintln(w, "Goal and related activities updated successfully")
 }
 
 
 
+func filterGoal(ctx context.Context, w http.ResponseWriter, req *http.Request) {
+    enableCors(&w)
 
+    var body setGoal
 
+    // Connect to the database
+    db, err := ConnectAndGetResponse(w, req, &body)
+    if err != nil {
+        HandleError(err, "Failed to connect", w)
+        return
+    }
+    defer db.Close()
 
+    // Prepare the SQL query
+    // query := `
+    //     SELECT 
+    //         goals_.goalId AS goal_id,
+    //         goals_.Name AS goal_name,
+    //         goals_.TargetPerDay AS goal_target_per_day,
+    //         goals_.LongTermTarget AS goal_long_term_target,
+    //         activity_.id AS activity_id,
+    //         activity_.Progress AS activity_progress
+    //     FROM 
+    //         goals_ 
+    //     JOIN 
+    //         activity_ ON goals_.goalId = activity_.goal_id;
+	// 	WHERE
+    //         goals_.goalId = $1;
+    // `
+ 
 
+	goalId := body.GoalId  
 
-//Set delete golas 
+    rows, err := db.Query(query)
+
+	
+    if err != nil {
+        panic(err)
+    }
+    defer rows.Close()
+	
+	if err != nil {
+        HandleError(err, "Failed to select info", w)
+        return
+    }
+ 
+
+    // Use http.StatusOK for updates
+    w.WriteHeader(http.StatusOK)
+    fmt.Fprintln(w, "Goal and related activities updated successfully")
+}

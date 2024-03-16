@@ -277,7 +277,7 @@ func main() {
 	http.HandleFunc("/logout", logoutHandler)
 
 	http.Handle("/goals", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		routes.UpdateGoals(ctx, w, req)
+		routes.DeleteGoalAndActivities(ctx, w, req)
 	}))
 
 	// http.Handle("/ActivityList", authMiddleware(http.HandlerFunc(newGoal.GetActivtiesListPerGoal)))

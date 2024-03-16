@@ -16,7 +16,7 @@ type setGoal struct {
     TargetPerDay    string `json:"TargetPerDay"`
     LongTermTarget  string `json:"LongTermTarget"`
     Progress        string `json:"Progress"`
-    GoalId          string    `json:"goalid"` 
+    GoalId          string `json:"goalid"` 
 }
 
  
@@ -154,6 +154,7 @@ func Goals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintln(w, "Goal data inserted successfully")
 }
 
+
 func UpdateGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
     enableCors(&w)
 
@@ -179,6 +180,11 @@ func UpdateGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) 
         WHERE goalId = $4
     `
 
+    updateProgQuery := `
+        UPDATE activity_ 
+        SET Progress = $1
+        WHERE goal_id  = $2
+    `
     // Execute the update query for goals_
     _, err = db.Exec(updateQuery, body.Name, body.LongTermTarget, body.TargetPerDay, updateGoalID)
     if err != nil {
@@ -186,11 +192,76 @@ func UpdateGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) 
         return
     }
 
+	_, err = db.Exec(updateProgQuery, body.Progress, updateGoalID)
+	if err != nil {
+		log.Println("Error updating activity:", err)
+		HandleError(err, "Failed to update Activity data", w)
+		return
+	}
+
     // Use http.StatusOK for updates
     w.WriteHeader(http.StatusOK)
     fmt.Fprintln(w, "Goal and related activities updated successfully")
 }
 
+
+
+//NEEDS TESTING STILL STOPING HERE FOR THE DAY
+func DeleteGoalAndActivities(ctx context.Context, w http.ResponseWriter, req *http.Request) {
+ 
+	enableCors(&w)
+
+    var body setGoal
+
+    // Connect to the database
+    db, err := ConnectAndGetResponse(w, req, &body)
+    if err != nil {
+        HandleError(err, "Failed to connect", w)
+        return
+    }
+    defer db.Close()
+
+    // Begin a transaction to ensure atomicity
+    tx, err := db.Begin()
+    if err != nil {
+        HandleError(err, "Failed to begin transaction", w)
+        return
+    }
+    defer tx.Rollback() // Rollback the transaction if not committed
+
+    // Delete associated activity records
+    deleteActivitiesQuery := `
+        DELETE FROM activity_
+        WHERE goal_id = $1
+    `
+    _, err = tx.Exec(deleteActivitiesQuery, goalID)
+    if err != nil {
+        HandleError(err, "Failed to delete activities", w)
+        return
+    }
+
+    // Delete the goal record
+    deleteGoalQuery := `
+        DELETE FROM goals_
+        WHERE goalId = $1
+    `
+    _, err = tx.Exec(deleteGoalQuery, goalID)
+    if err != nil {
+        HandleError(err, "Failed to delete goal", w)
+        return
+    }
+
+    // Commit the transaction
+    err = tx.Commit()
+    if err != nil {
+        HandleError(err, "Failed to commit transaction", w)
+        return
+    }
+
+    // Respond with success message
+    w.WriteHeader(http.StatusOK)
+    fmt.Fprintln(w, "Goal and associated activities deleted successfully")
+}
 
 
 

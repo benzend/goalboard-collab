@@ -10,11 +10,11 @@ func GetJwtSecret() []byte {
 	env, err := env.ReadFile(".env")
 
 	if err != nil {
-		fmt.Print("failed to read jwt env")
+		fmt.Print("failed to read env")
 		return nil
 	}
 
-	jwtSalt := Invariant(env["jwtsalt"], "missing `jwtsalt` env variable")
+	hmacSecret := Invariant(env["hmacSampleSecret"], "missing `hmacSampleSecret` env variable")
 
-	return []byte(jwtSalt)
+	return []byte(hmacSecret)
 }

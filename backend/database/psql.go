@@ -21,11 +21,11 @@ func Connect() (db *sql.DB, err error) {
 		panic(fmt.Sprintf("Failed to read env file: %v", err))
 	}
 
-	host := utils.Invariant[string](env["host"], "missing `host` env variable")
-	password := utils.Invariant[string](env["password"], "missing `password` env variable")
-	port := utils.Invariant[string](env["port"], "missing `port` env variable")
-	user := utils.Invariant[string](env["user"], "missing `user` env variable")
-	dbname := utils.Invariant[string](env["dbname"], "missing `dbname` env variable")
+	host := utils.Invariant(env["host"], "missing `host` env variable")
+	password := utils.Invariant(env["password"], "missing `password` env variable")
+	port := utils.Invariant(env["port"], "missing `port` env variable")
+	user := utils.Invariant(env["user"], "missing `user` env variable")
+	dbname := utils.Invariant(env["dbname"], "missing `dbname` env variable")
 
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
 		"password=%s dbname=%s sslmode=disable",

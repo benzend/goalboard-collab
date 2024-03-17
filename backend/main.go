@@ -277,8 +277,25 @@ func main() {
 	http.HandleFunc("/logout", logoutHandler)
 
 	http.Handle("/goals", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		routes.Goals(ctx, w, req)
+	}))
+
+
+	http.Handle("/goals/updateGoals", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		routes.UpdateGoals(ctx, w, req)
+	}))
+
+
+
+	http.Handle("/deletegoals", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		routes.DeleteGoalAndActivities(ctx, w, req)
 	}))
+
+
+	http.Handle("/SelectAllGoals", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		routes.SelectAllGoals(ctx, w, req)
+	}))
+
 
 	// http.Handle("/ActivityList", authMiddleware(http.HandlerFunc(newGoal.GetActivtiesListPerGoal)))
 

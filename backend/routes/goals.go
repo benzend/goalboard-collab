@@ -204,11 +204,8 @@ func UpdateGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) 
     fmt.Fprintln(w, "Goal and related activities updated successfully")
 }
 
-
-
-
 func DeleteGoalAndActivities(ctx context.Context, w http.ResponseWriter, req *http.Request) {
-    enableCors(&w)
+     enableCors(&w)
 
     var body setGoal
 
@@ -219,125 +216,83 @@ func DeleteGoalAndActivities(ctx context.Context, w http.ResponseWriter, req *ht
         return
     }
     defer db.Close()
+    // Get the goal ID from the request body
+    updateGoalID := body.GoalId
 
-  
-    updateGoalID := body.GoalId  
-
- 
-    DeleteGoals :=`
-		DELETE FROM goals_
-		WHERE goalId = $1
+    // Define the delete query
+    deleteQuery := `
+        DELETE FROM goals_
+        WHERE goalid = $1
     `
 
-    // Execute the update query for goals_
-    _, err = db.Exec(DeleteGoals,updateGoalID)
+    // Execute the delete query for goals_
+    _, err = db.Exec(deleteQuery, updateGoalID)
     if err != nil {
-        HandleError(err, "Failed to update goal data", w)
+        log.Println("Failed to delete goal:", err)
+        http.Error(w, "Failed to delete goal", http.StatusInternalServerError)
         return
     }
- 
 
-    // Use http.StatusOK for updates
+    // Send a success response
     w.WriteHeader(http.StatusOK)
     fmt.Fprintln(w, "Goal and related activities updated successfully")
 }
- 
 
-func selectAllGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
+func SelectAllGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
     enableCors(&w)
 
-    var body setGoal
-
-    // Connect to the database
-    db, err := ConnectAndGetResponse(w, req, &body)
-    if err != nil {
-        HandleError(err, "Failed to connect", w)
-        return
-    }
-    defer db.Close()
  
-	query:= `
-			SELECT 
-			goals_.*, 
-			activity_.*
-		FROM 
-			goals_ 
-		JOIN 
-			activity_ ON goals_.goalId = activity_.goal_id;
-		
-	`
-
-	goalId := body.GoalId  
-
-    rows, err := db.Query(query)
-
+	var goal setGoal
+    // Connect to the database
+    db, err := ConnectAndGetResponse(w, req, &goal)
+	if err != nil {
+		log.Println("Error occurred while executing query:", err)
+		http.Error(w, "Failed to fetch goals", http.StatusInternalServerError)
+		return
+	}
 	
-    if err != nil {
-        panic(err)
+    defer db.Close()
+
+	log.Println("ran")
+	
+	rows, err := db.Query("SELECT * FROM goals_")
+    
+	if err != nil {
+        log.Fatal(err)
     }
     defer rows.Close()
+    GoalsArr := []setGoal{}
+
+    for rows.Next() {
+     
+		if err := rows.Scan(&goal.GoalId, &goal.Name, &goal.TargetPerDay, &goal.LongTermTarget, &goal.Progress); err != nil {
+			log.Println("Failed to scan row:", err)
+			http.Error(w, "Failed to fetch goals", http.StatusInternalServerError)
+			return
+		}
+		GoalsArr = append(GoalsArr,goal)
 	
-	if err != nil {
-        HandleError(err, "Failed to select info", w)
+    }
+	
+	if err := rows.Err(); err != nil {
+        log.Println("Error occurred while iterating over rows:", err)
+        http.Error(w, "Failed to fetch goals", http.StatusInternalServerError)
         return
     }
- 
 
-    // Use http.StatusOK for updates
+    // Marshal the slice of setGoal structs into JSON
+    jsonResponse, err := json.Marshal(GoalsArr)
+    if err != nil {
+        log.Println("Failed to marshal JSON:", err)
+        http.Error(w, "Failed to fetch goals", http.StatusInternalServerError)
+        return
+    }
+
+    // Set Content-Type header and send JSON response
+    w.Header().Set("Content-Type", "application/json")
     w.WriteHeader(http.StatusOK)
-    fmt.Fprintln(w, "Goal and related activities updated successfully")
+    w.Write(jsonResponse)
 }
 
 
-
-func filterGoal(ctx context.Context, w http.ResponseWriter, req *http.Request) {
-    enableCors(&w)
-
-    var body setGoal
-
-    // Connect to the database
-    db, err := ConnectAndGetResponse(w, req, &body)
-    if err != nil {
-        HandleError(err, "Failed to connect", w)
-        return
-    }
-    defer db.Close()
-
-    // Prepare the SQL query
-    // query := `
-    //     SELECT 
-    //         goals_.goalId AS goal_id,
-    //         goals_.Name AS goal_name,
-    //         goals_.TargetPerDay AS goal_target_per_day,
-    //         goals_.LongTermTarget AS goal_long_term_target,
-    //         activity_.id AS activity_id,
-    //         activity_.Progress AS activity_progress
-    //     FROM 
-    //         goals_ 
-    //     JOIN 
-    //         activity_ ON goals_.goalId = activity_.goal_id;
-	// 	WHERE
-    //         goals_.goalId = $1;
-    // `
  
-
-	goalId := body.GoalId  
-
-    rows, err := db.Query(query)
-
-	
-    if err != nil {
-        panic(err)
-    }
-    defer rows.Close()
-	
-	if err != nil {
-        HandleError(err, "Failed to select info", w)
-        return
-    }
- 
-
-    // Use http.StatusOK for updates
-    w.WriteHeader(http.StatusOK)
-    fmt.Fprintln(w, "Goal and related activities updated successfully")
-}

@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS activity_ (
     goal_id   INT,
     CONSTRAINT goal_fk
         FOREIGN KEY (goal_id) 
-        REFERENCES goals_ (goalId) ON DELETE CASCADE -
+        REFERENCES goals_ (goalId) ON DELETE CASCADE
 );
 
 COMMIT;

@@ -1,7 +1,7 @@
 BEGIN;
 
 CREATE TABLE IF NOT EXISTS goal (
-    goal_id           SERIAL PRIMARY KEY,
+    id                SERIAL PRIMARY KEY,
     name              VARCHAR(50),
     target_per_day    VARCHAR,
     long_term_target  VARCHAR,

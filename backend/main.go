@@ -26,7 +26,7 @@ func main() {
 
 	defer db.Close()
 
-	// var newGoal models.Goal
+	// var newGoal models.Goal4
 	router := router.NewRouter()
 	router.Ctx(ctx)
 

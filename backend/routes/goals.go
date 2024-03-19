@@ -14,7 +14,9 @@ import (
 )
 
 type setGoal struct {
+	GoalID         string `json:"id"`
 	Name           string `json:"name"`
+	Progress       string `json:"progress"`
 	LongTermTarget string `json:"long_term_target"`
 	TargetPerDay   string `json:"target_per_day"`
 }
@@ -71,7 +73,7 @@ func GetGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 	db, ok := ctx.Value(utils.CTX_KEY_DB).(*sql.DB)
 
 	if !ok {
-		log.Println("failed to retrieve database", err)
+		log.Println("failed to retrieve database")
 		http.Error(w, "server error", http.StatusInternalServerError)
 		return
 	}
@@ -109,4 +111,86 @@ func GetGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(w).Encode(Res{ Goals: goals })
 	// If everything is fine, send a success response
 	w.WriteHeader(http.StatusOK)
+}
+
+func UpdateGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
+    utils.EnableCors(&w)
+
+    var body setGoal
+
+    db, ok := ctx.Value(utils.CTX_KEY_DB).(*sql.DB)
+    if !ok {
+				log.Println("failed to retrieve database")
+				http.Error(w, "server error", http.StatusInternalServerError)
+        return
+    }
+
+    // Assuming ConnectAndGetResponse fills the 'body' including 'GoalId'
+    updateGoalID := body.GoalID
+
+    // Update goals_ table without Progress as it does not belong to this table
+    updateQuery := `
+        UPDATE goal
+        SET name = $1,
+            long_term_target = $2,
+            target_per_day = $3
+        WHERE goalId = $4
+    `
+
+    updateProgQuery := `
+        UPDATE activity
+        SET progress = $1
+        WHERE goal_id  = $2
+    `
+    // Execute the update query for goals_
+		_, err := db.Exec(updateQuery, body.Name, body.LongTermTarget, body.TargetPerDay, updateGoalID)
+    if err != nil {
+				log.Println("failed to retrieve database")
+				http.Error(w, "server error", http.StatusInternalServerError)
+        return
+    }
+
+	_, err = db.Exec(updateProgQuery, body.Progress, updateGoalID)
+	if err != nil {
+		log.Println("Error updating activity:", err)
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
+
+    // Use http.StatusOK for updates
+    w.WriteHeader(http.StatusOK)
+    fmt.Fprintln(w, "Goal and related activities updated successfully")
+}
+
+func DeleteGoalAndActivities(ctx context.Context, w http.ResponseWriter, req *http.Request) {
+    utils.EnableCors(&w)
+
+    var body setGoal
+
+    db, ok := ctx.Value(utils.CTX_KEY_DB).(*sql.DB)
+    if !ok {
+				log.Println("failed to retrieve database")
+				http.Error(w, "server error", http.StatusInternalServerError)
+        return
+    }
+
+    updateGoalID := body.GoalID
+
+    // Define the delete query
+    deleteQuery := `
+        DELETE FROM goal
+        WHERE goal_id = $1
+    `
+
+    // Execute the delete query for goals_
+		_, err := db.Exec(deleteQuery, updateGoalID)
+    if err != nil {
+        log.Println("Failed to delete goal:", err)
+        http.Error(w, "Failed to delete goal", http.StatusInternalServerError)
+        return
+    }
+
+    // Send a success response
+    w.WriteHeader(http.StatusOK)
+    fmt.Fprintln(w, "Goal and related activities updated successfully")
 }

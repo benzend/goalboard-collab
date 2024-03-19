@@ -2,6 +2,8 @@ package router
 
 import (
 	"context"
+	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -102,32 +104,38 @@ func (router* router) Build() {
 		}
 
 		http.HandleFunc(path, func(w http.ResponseWriter, r* http.Request) {
+			log.Println(fmt.Sprintf("started - %v %v", r.Method, path))
+
+			foundValidMethod := false
 			if routesInPath.Get != nil {
 				if r.Method == http.MethodGet {
 					routesInPath.Get(router.ctx, w, r)
-					return
+					foundValidMethod = true
 				}
 			}
 			if routesInPath.Post != nil {
 				if r.Method == http.MethodPost {
 					routesInPath.Post(router.ctx, w, r)
-					return
+					foundValidMethod = true
 				}
 			}
 			if routesInPath.Put != nil {
 				if r.Method == http.MethodPut {
 					routesInPath.Put(router.ctx, w, r)
-					return
+					foundValidMethod = true
 				}
 			}
 			if routesInPath.Delete != nil {
 				if r.Method == http.MethodDelete {
 					routesInPath.Delete(router.ctx, w, r)
-					return
+					foundValidMethod = true
 				}
 			}
 
-			http.Error(w, http.ErrNotSupported.ErrorString, http.StatusMethodNotAllowed)
+			if !foundValidMethod {
+				http.Error(w, http.ErrNotSupported.ErrorString, http.StatusMethodNotAllowed)
+				return
+			}
 		})
 	}
 }

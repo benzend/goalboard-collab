@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS activity (
     goal_id   INT,
     CONSTRAINT goal_fk
         FOREIGN KEY (goal_id)
-        REFERENCES goal (goal_id)  -- Reference the goalId column in the goals_ table
+        REFERENCES goal (id)  -- Reference the goalId column in the goals_ table
 );
 
 

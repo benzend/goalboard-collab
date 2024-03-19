@@ -7,8 +7,8 @@ CREATE TABLE IF NOT EXISTS goal (
     long_term_target  VARCHAR,
     user_id           INT,  -- Define the user_id column
     CONSTRAINT user_fk
-        FOREIGN KEY(user_id)
-        REFERENCES user_(id)  -- Reference the id column in the user_ table
+        FOREIGN KEY (user_id)
+        REFERENCES user_ (id)  -- Reference the id column in the user_ table
 );
 
 COMMIT;

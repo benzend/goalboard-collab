@@ -78,7 +78,7 @@ func GetGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	query := "SELECT goal_id, name, target_per_day, long_term_target FROM goal WHERE user_id = $1"
+	query := "SELECT id, name, target_per_day, long_term_target FROM goal WHERE user_id = $1"
 
 	type Goal struct {
 		ID string `json:"id"`
@@ -134,7 +134,7 @@ func UpdateGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) 
         SET name = $1,
             long_term_target = $2,
             target_per_day = $3
-        WHERE goalId = $4
+        WHERE id = $4
     `
 
     updateProgQuery := `
@@ -150,12 +150,12 @@ func UpdateGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) 
         return
     }
 
-	_, err = db.Exec(updateProgQuery, body.Progress, updateGoalID)
-	if err != nil {
-		log.Println("Error updating activity:", err)
-		http.Error(w, "server error", http.StatusInternalServerError)
-		return
-	}
+		_, err = db.Exec(updateProgQuery, body.Progress, updateGoalID)
+		if err != nil {
+			log.Println("Error updating activity:", err)
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
+		}
 
     // Use http.StatusOK for updates
     w.WriteHeader(http.StatusOK)
@@ -179,7 +179,7 @@ func DeleteGoalAndActivities(ctx context.Context, w http.ResponseWriter, req *ht
     // Define the delete query
     deleteQuery := `
         DELETE FROM goal
-        WHERE goal_id = $1
+        WHERE id = $1
     `
 
     // Execute the delete query for goals_

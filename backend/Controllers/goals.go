@@ -13,19 +13,13 @@ import (
 )
 
 type setGoal struct {
-	Name           string `json:"Name"`
-	LongTermTarget string `json:"LongTermTarget"`
-	TargetPerDay   string `json:"TargetPerDay"`
+	Name           string `json:"name"`
+	LongTermTarget string `json:"longTermTarget"`
+	TargetPerDay   string `json:"targetPerDay"`
 }
 
 func Goals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
-<<<<<<< HEAD:backend/routes/goals.go
-	enableCors(&w)
- 
-=======
 	utils.EnableCors(&w)
->>>>>>> 4bdc19c20cba3122e1fa3bf331130caa0582b81d:backend/Controllers/goals.go
-
 	var body setGoal
 
 	err := json.NewDecoder(req.Body).Decode(&body)

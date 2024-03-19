@@ -19,7 +19,12 @@ type setGoal struct {
 }
 
 func Goals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
+<<<<<<< HEAD:backend/routes/goals.go
+	enableCors(&w)
+ 
+=======
 	utils.EnableCors(&w)
+>>>>>>> 4bdc19c20cba3122e1fa3bf331130caa0582b81d:backend/Controllers/goals.go
 
 	var body setGoal
 

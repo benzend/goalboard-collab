@@ -13,9 +13,9 @@ import (
 )
 
 type setGoal struct {
-	Name           string `json:"Name"`
-	LongTermTarget string `json:"LongTermTarget"`
-	TargetPerDay   string `json:"TargetPerDay"`
+	Name           string `json:"name"`
+	LongTermTarget string `json:"longTermTarget"`
+	TargetPerDay   string `json:"targetPerDay"`
 }
 
 func Goals(ctx context.Context, w http.ResponseWriter, req *http.Request) {

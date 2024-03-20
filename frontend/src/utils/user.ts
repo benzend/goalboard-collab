@@ -18,8 +18,15 @@ export type CreateUserData = {
   password: string;
 };
 
-export async function createUser(data: CreateUserData): Promise<User> {
-  const res = await fetch('http://localhost:8000/register', {
+export type CreateUserReturnData = {
+  user: User;
+  token: string;
+};
+
+export async function createUser(
+  data: CreateUserData
+): Promise<CreateUserReturnData> {
+  const res = await fetch('http://localhost:8000/CreateUser', {
     body: JSON.stringify(data),
     method: 'POST',
   });
@@ -35,8 +42,8 @@ export type LoginUserData = {
 };
 
 export type LoginUserReturnData = {
-  token: string;
   user: User;
+  token: string;
 };
 
 export async function loginUser(

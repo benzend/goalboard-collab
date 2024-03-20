@@ -4,10 +4,16 @@ import { FormEvent, FormEventHandler } from 'react';
 import { Button } from './components/Button';
 import { Input } from './components/Input';
 import { Heading } from './components/Heading';
-import { loginUser } from './utils/user';
+import { useAuth } from './auth/AuthProvider';
 
 export const Login = () => {
   const navigate = useNavigate();
+  const auth = useAuth();
+
+  if (auth?.user) {
+    navigate(`/${auth?.user.id}/goals`);
+  }
+
   const handleSubmit: FormEventHandler = (e: FormEvent) => {
     e.preventDefault();
 
@@ -28,15 +34,17 @@ export const Login = () => {
      * TODO: so that we can move around the app freely once
      * TODO: logged in
      */
-    loginUser({ username, password })
-      .then((user) => {
-        console.debug({ user });
-        navigate(`/${user.id}/goals`);
-      })
-      .catch((err) => {
-        console.error({ err });
-        alert('failed to login');
-      });
+
+    auth?.loginAction({ username, password });
+    // loginUser({ username, password })
+    //   .then((user) => {
+    //     console.debug({ user });
+    //     navigate(`/${user.id}/goals`);
+    //   })
+    //   .catch((err) => {
+    //     console.error({ err });
+    //     alert('failed to login');
+    //   });
   };
   return (
     <div className="min-h-screen">

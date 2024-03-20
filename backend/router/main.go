@@ -54,6 +54,7 @@ func NewRouter() router {
 func (r* router) Get(path string, handle Handle) {
 	if routes, ok := r.routes[path]; ok {
 		routes.Get = handle
+		r.routes[path] = routes
 	} else {
 		r.routes[path] = RouteMethod{ Get: handle }
 	}
@@ -63,6 +64,7 @@ func (r* router) Get(path string, handle Handle) {
 func (r* router) Post(path string, handle Handle) {
 	if routes, ok := r.routes[path]; ok {
 		routes.Post = handle
+		r.routes[path] = routes
 	} else {
 		r.routes[path] = RouteMethod{ Post: handle }
 	}
@@ -72,6 +74,7 @@ func (r* router) Post(path string, handle Handle) {
 func (r* router) Put(path string, handle Handle) {
 	if routes, ok := r.routes[path]; ok {
 		routes.Put = handle
+		r.routes[path] = routes
 	} else {
 		r.routes[path] = RouteMethod{ Put: handle }
 	}
@@ -81,6 +84,7 @@ func (r* router) Put(path string, handle Handle) {
 func (r* router) Delete(path string, handle Handle) {
 	if routes, ok := r.routes[path]; ok {
 		routes.Delete = handle
+		r.routes[path] = routes
 	} else {
 		r.routes[path] = RouteMethod{ Delete: handle }
 	}
@@ -106,30 +110,27 @@ func (router* router) Build() {
 		http.HandleFunc(path, func(w http.ResponseWriter, r* http.Request) {
 			log.Println(fmt.Sprintf("started - %v %v", r.Method, path))
 
-			if routesInPath.Get != nil {
-				if r.Method == http.MethodGet {
-					routesInPath.Get(router.ctx, w, r)
-					return
-				}
+			if r.Method == http.MethodGet && routesInPath.Get != nil {
+				routesInPath.Get(router.ctx, w, r)
+				return
 			}
-			if routesInPath.Post != nil {
-				if r.Method == http.MethodPost {
-					routesInPath.Post(router.ctx, w, r)
-					return
-				}
+
+			if r.Method == http.MethodPost && routesInPath.Post != nil {
+				routesInPath.Post(router.ctx, w, r)
+				return
 			}
-			if routesInPath.Put != nil {
-				if r.Method == http.MethodPut {
-					routesInPath.Put(router.ctx, w, r)
-					return
-				}
+
+			if r.Method == http.MethodPut && routesInPath.Put != nil {
+				routesInPath.Put(router.ctx, w, r)
+				return
 			}
-			if routesInPath.Delete != nil {
-				if r.Method == http.MethodDelete {
-					routesInPath.Delete(router.ctx, w, r)
-					return
-				}
+
+			if r.Method == http.MethodDelete && routesInPath.Delete != nil {
+				routesInPath.Delete(router.ctx, w, r)
+				return
 			}
+
+			http.Error(w, "invalid request", http.StatusForbidden)
 		})
 	}
 }

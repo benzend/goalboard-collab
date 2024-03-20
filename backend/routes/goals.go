@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/benzend/goalboard/auth"
+	goal_model "github.com/benzend/goalboard/models/goal"
 	"github.com/benzend/goalboard/utils"
 	_ "github.com/lib/pq"
 )
@@ -47,9 +48,8 @@ func CreateGoal(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	query := "INSERT INTO goal (name, target_per_day, long_term_target, user_id) VALUES ($1, $2, $3, $4)"
+	goalID, err := goal_model.Create(db, body.Name, body.TargetPerDay, body.LongTermTarget, user.ID)
 
-	_, err = db.Exec(query, body.Name, body.TargetPerDay, body.LongTermTarget, user.ID)
 	if err != nil {
 		log.Println("failed to insert goal data", err)
 		http.Error(w, "server error", http.StatusInternalServerError)
@@ -57,8 +57,18 @@ func CreateGoal(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 	}
 
 	// If everything is fine, send a success response
+	type Data struct {
+		GoalID int64 `json:"goal_id"`
+	}
+	err = json.NewEncoder(w).Encode(Data{ GoalID: goalID })
+
+	if err != nil {
+		log.Println("failed to encode json data", err)
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(http.StatusCreated)
-	fmt.Fprintln(w, "Goal data inserted successfully")
 }
 
 func GetGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) {

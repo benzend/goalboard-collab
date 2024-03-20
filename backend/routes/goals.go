@@ -2,202 +2,160 @@ package routes
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"database/sql"
-	"github.com/benzend/goalboard/database"
-	"github.com/golang-jwt/jwt/v5"
+
+	"github.com/benzend/goalboard/auth"
+	"github.com/benzend/goalboard/utils"
+	_ "github.com/lib/pq"
 )
 
 type setGoal struct {
-    Name            string `json:"Name"`
-    TargetPerDay    string `json:"TargetPerDay"`
-    LongTermTarget  string `json:"LongTermTarget"`
-    Progress        string `json:"Progress"`
-    GoalId          string `json:"goalid"` 
+	GoalID         string `json:"id"`
+	Name           string `json:"name"`
+	Progress       string `json:"progress"`
+	LongTermTarget string `json:"long_term_target"`
+	TargetPerDay   string `json:"target_per_day"`
 }
 
- 
-var hmacSampleSecret = []byte("secrect")
+func CreateGoal(ctx context.Context, w http.ResponseWriter, req *http.Request) {
+	utils.EnableCors(&w)
 
+	user, err := auth.Authorize(ctx, w, req)
 
-func userAuthInfo(w http.ResponseWriter, req *http.Request) (jwt.MapClaims, error) {
-    // Parse and validate the JWT token from the cookie
-    sessionInfo, err := req.Cookie("jwt_token")
-    if err != nil {
-        // No session cookie found
-        http.Error(w, "No session cookie found", http.StatusUnauthorized)
-        return nil, err
-    }
-
-    tokenString := sessionInfo.Value
-
-    token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-        // Validate the signing method
-        if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-            return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-        }
-        // Return the byte array representation of the secret key
-        return hmacSampleSecret, nil
-    })
-
-    if err != nil {
-        log.Println("failed to parse token", err)
-        http.Error(w, "Invalid token", http.StatusUnauthorized)
-        return nil, err
-    }
-
-    // Extract claims from the token
-    claims, ok := token.Claims.(jwt.MapClaims)
-    if !ok || !token.Valid {
-        // Token is invalid or claims couldn't be extracted
-        http.Error(w, "Invalid token", http.StatusUnauthorized)
-        return nil, fmt.Errorf("Invalid token")
-    }
-
-    return claims, nil
-}
-func ConnectAndGetResponse(w http.ResponseWriter, req *http.Request, body *setGoal) (*sql.DB, error) {
-    err := json.NewDecoder(req.Body).Decode(body)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return nil, err
-    }
-
-    // Connect to the database
-    db, err := database.Connect()
-    if err != nil {
-        log.Println("failed to connect to database", err)
-        http.Error(w, "server error", http.StatusInternalServerError)
-        return nil, err
-    }
-
-    return db, nil
-}
-
-
-
-func HandleError(err error, errorVal string, w http.ResponseWriter) {
 	if err != nil {
-		log.Println(errorVal)
+		return
+	}
+
+	var body setGoal
+
+	err = json.NewDecoder(req.Body).Decode(&body)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	db, ok := ctx.Value(utils.CTX_KEY_DB).(*sql.DB)
+
+	if !ok {
+		log.Println("failed to retrieve database", err)
 		http.Error(w, "server error", http.StatusInternalServerError)
 		return
 	}
-}
 
+	query := "INSERT INTO goal (name, target_per_day, long_term_target, user_id) VALUES ($1, $2, $3, $4)"
 
-func enableCors(w *http.ResponseWriter) {
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
-}
-
-func Goals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
-	enableCors(&w)
-
-	var body setGoal
- 
-
-	db,err := ConnectAndGetResponse(w,req, &body)
-
- 
-	HandleError(err, "failed to connect ", w)
-	
-
-	defer db.Close()
-	claims, err := userAuthInfo(w, req)
-   
+	_, err = db.Exec(query, body.Name, body.TargetPerDay, body.LongTermTarget, user.ID)
 	if err != nil {
-        // Handle the error, such as returning an unauthorized response
-        http.Error(w, "Unauthorized", http.StatusUnauthorized)
-        return
-    }
-
-	var userID int
-
-	// Query to fetch the user ID based on the username obtained from the token
-	getUserQuery := "SELECT id FROM user_ WHERE username = $1;"
-
-	// Extract the username from the JWT token claims
-	username, ok := claims["username"]
-	if !ok {
-		// Username not found or not in expected format
-		http.Error(w, "Invalid token format", http.StatusUnauthorized)
+		log.Println("failed to insert goal data", err)
+		http.Error(w, "server error", http.StatusInternalServerError)
 		return
 	}
-	
-	// Query the database to get the user ID by username
-	err = db.QueryRow(getUserQuery, username).Scan(&userID)
- 
-	HandleError(err, "failed to get user", w)
-	
-
-	// Construct the query to insert the goal data and retrieve the goal ID
-	query := "INSERT INTO goals_ (Name, TargetPerDay, LongTermTarget, user_id) VALUES ($1, $2, $3, $4) RETURNING goalid"
-	// Execute the query to insert the goal data and retrieve the goal ID
-	var goalID int
-	
-	err = db.QueryRow(query, body.Name, body.TargetPerDay, body.LongTermTarget, userID).Scan(&goalID)
- 
-	
-	HandleError(err, "failed to insert goal data", w)
-
-	// Construct the query to insert the progress data
-	insertProgress := "INSERT INTO activity_ (goal_id, progress) VALUES ($1, $2)"
-	// Execute the query to insert the progress data
-	_, err = db.Exec(insertProgress, goalID, body.Progress)
-	 
-	HandleError(err, "Failed to insert Progress data", w)
 
 	// If everything is fine, send a success response
 	w.WriteHeader(http.StatusCreated)
 	fmt.Fprintln(w, "Goal data inserted successfully")
 }
 
+func GetGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
+	utils.EnableCors(&w)
+
+	user, err := auth.Authorize(ctx, w, req)
+
+	if err != nil {
+		return
+	}
+
+	db, ok := ctx.Value(utils.CTX_KEY_DB).(*sql.DB)
+
+	if !ok {
+		log.Println("failed to retrieve database")
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
+
+	query := "SELECT id, name, target_per_day, long_term_target FROM goal WHERE user_id = $1"
+
+	type Goal struct {
+		ID string `json:"id"`
+		Name string `json:"name"`
+		TargetPerDay string `json:"target_per_day"`
+		LongTermTarget string `json:"long_term_target"`
+	}
+	var goals []Goal
+
+	rows, err := db.Query(query, user.ID)
+	if err != nil {
+		log.Println("failed to insert goal data", err)
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
+
+	for rows.Next() {
+		var row Goal
+		if err := rows.Scan(&row.ID, &row.Name, &row.TargetPerDay, &row.LongTermTarget); err != nil {
+			http.Error(w, "row scanning error", http.StatusInternalServerError)
+			return
+		} else {
+			goals = append(goals, row)
+		}
+	}
+
+	type Res struct {
+		Goals []Goal `json:"goals"`
+	}
+	json.NewEncoder(w).Encode(Res{ Goals: goals })
+	// If everything is fine, send a success response
+	w.WriteHeader(http.StatusOK)
+}
 
 func UpdateGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
-    enableCors(&w)
+    utils.EnableCors(&w)
 
     var body setGoal
 
-    // Connect to the database
-    db, err := ConnectAndGetResponse(w, req, &body)
-    if err != nil {
-        HandleError(err, "Failed to connect", w)
+    db, ok := ctx.Value(utils.CTX_KEY_DB).(*sql.DB)
+    if !ok {
+				log.Println("failed to retrieve database")
+				http.Error(w, "server error", http.StatusInternalServerError)
         return
     }
-    defer db.Close()
 
     // Assuming ConnectAndGetResponse fills the 'body' including 'GoalId'
-    updateGoalID := body.GoalId // Corrected to use GoalId with correct capitalization
+    updateGoalID := body.GoalID
 
     // Update goals_ table without Progress as it does not belong to this table
     updateQuery := `
-        UPDATE goals_
-        SET Name = $1,
-            LongTermTarget = $2,
-            TargetPerDay = $3
-        WHERE goalId = $4
+        UPDATE goal
+        SET name = $1,
+            long_term_target = $2,
+            target_per_day = $3
+        WHERE id = $4
     `
 
     updateProgQuery := `
-        UPDATE activity_ 
-        SET Progress = $1
+        UPDATE activity
+        SET progress = $1
         WHERE goal_id  = $2
     `
     // Execute the update query for goals_
-    _, err = db.Exec(updateQuery, body.Name, body.LongTermTarget, body.TargetPerDay, updateGoalID)
+		_, err := db.Exec(updateQuery, body.Name, body.LongTermTarget, body.TargetPerDay, updateGoalID)
     if err != nil {
-        HandleError(err, "Failed to update goal data", w)
+				log.Println("failed to retrieve database")
+				http.Error(w, "server error", http.StatusInternalServerError)
         return
     }
 
-	_, err = db.Exec(updateProgQuery, body.Progress, updateGoalID)
-	if err != nil {
-		log.Println("Error updating activity:", err)
-		HandleError(err, "Failed to update Activity data", w)
-		return
-	}
+		_, err = db.Exec(updateProgQuery, body.Progress, updateGoalID)
+		if err != nil {
+			log.Println("Error updating activity:", err)
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
+		}
 
     // Use http.StatusOK for updates
     w.WriteHeader(http.StatusOK)
@@ -205,28 +163,27 @@ func UpdateGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) 
 }
 
 func DeleteGoalAndActivities(ctx context.Context, w http.ResponseWriter, req *http.Request) {
-     enableCors(&w)
+    utils.EnableCors(&w)
 
     var body setGoal
 
-    // Connect to the database
-    db, err := ConnectAndGetResponse(w, req, &body)
-    if err != nil {
-        HandleError(err, "Failed to connect", w)
+    db, ok := ctx.Value(utils.CTX_KEY_DB).(*sql.DB)
+    if !ok {
+				log.Println("failed to retrieve database")
+				http.Error(w, "server error", http.StatusInternalServerError)
         return
     }
-    defer db.Close()
-    // Get the goal ID from the request body
-    updateGoalID := body.GoalId
+
+    updateGoalID := body.GoalID
 
     // Define the delete query
     deleteQuery := `
-        DELETE FROM goals_
-        WHERE goalid = $1
+        DELETE FROM goal
+        WHERE id = $1
     `
 
     // Execute the delete query for goals_
-    _, err = db.Exec(deleteQuery, updateGoalID)
+		_, err := db.Exec(deleteQuery, updateGoalID)
     if err != nil {
         log.Println("Failed to delete goal:", err)
         http.Error(w, "Failed to delete goal", http.StatusInternalServerError)
@@ -237,62 +194,3 @@ func DeleteGoalAndActivities(ctx context.Context, w http.ResponseWriter, req *ht
     w.WriteHeader(http.StatusOK)
     fmt.Fprintln(w, "Goal and related activities updated successfully")
 }
-
-func SelectAllGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
-    enableCors(&w)
-
- 
-	var goal setGoal
-    // Connect to the database
-    db, err := ConnectAndGetResponse(w, req, &goal)
-	if err != nil {
-		log.Println("Error occurred while executing query:", err)
-		http.Error(w, "Failed to fetch goals", http.StatusInternalServerError)
-		return
-	}
-	
-    defer db.Close()
-
-	log.Println("ran")
-	
-	rows, err := db.Query("SELECT * FROM goals_")
-    
-	if err != nil {
-        log.Fatal(err)
-    }
-    defer rows.Close()
-    GoalsArr := []setGoal{}
-
-    for rows.Next() {
-     
-		if err := rows.Scan(&goal.GoalId, &goal.Name, &goal.TargetPerDay, &goal.LongTermTarget, &goal.Progress); err != nil {
-			log.Println("Failed to scan row:", err)
-			http.Error(w, "Failed to fetch goals", http.StatusInternalServerError)
-			return
-		}
-		GoalsArr = append(GoalsArr,goal)
-	
-    }
-	
-	if err := rows.Err(); err != nil {
-        log.Println("Error occurred while iterating over rows:", err)
-        http.Error(w, "Failed to fetch goals", http.StatusInternalServerError)
-        return
-    }
-
-    // Marshal the slice of setGoal structs into JSON
-    jsonResponse, err := json.Marshal(GoalsArr)
-    if err != nil {
-        log.Println("Failed to marshal JSON:", err)
-        http.Error(w, "Failed to fetch goals", http.StatusInternalServerError)
-        return
-    }
-
-    // Set Content-Type header and send JSON response
-    w.Header().Set("Content-Type", "application/json")
-    w.WriteHeader(http.StatusOK)
-    w.Write(jsonResponse)
-}
-
-
- 

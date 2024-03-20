@@ -10,15 +10,15 @@ var getUserQuery = "SELECT id FROM user_ WHERE username = $1;"
 //of the infromation.
 
 var resetGoalProgress = `
-	UPDATE activity_
-	SET Progress = $1
+	UPDATE activity
+	SET progress = $1
 	WHERE user_id = $2;
 `
-var InsertActivityProgress = "INSERT INTO activity_(Progress, user_id) VALUES ($1)"
+var InsertActivityProgress = "INSERT INTO activity (progress, user_id) VALUES ($1)"
 
 var ShowGoalProgress = `
-	SELECT g.Name AS goal_name, a.Progress AS progress
-	FROM goals_ g
-	JOIN activity_ a ON g.goalId = a.goal_id
+	SELECT g.name AS goal_name, a.progress AS progress
+	FROM goal g
+	JOIN activity a ON g.id = a.goal_id
 	WHERE g.user_id = $1;
 `

@@ -10,6 +10,7 @@ import (
 
 	"github.com/benzend/goalboard/pw"
 	"github.com/benzend/goalboard/utils"
+	"github.com/benzend/goalboard/models/user"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -20,15 +21,8 @@ type LoginRequestBody struct {
 
 type LoginReturnData struct {
 	Token string `json:"token"`
-	User User `json:"user"`
+	User user_model.GetUser `json:"user"`
 }
-
-type User struct {
-	Id       string `json:"id"`
-	Username string `json:"username"`
-}
-
-var jwtKey = []byte("secrect")
 
 func Register(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		utils.EnableCors(&w)
@@ -52,24 +46,21 @@ func Register(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		password := body.Password
 		hash, _ := pw.HashPassword(password) // ignore error for the sake of simplicity
 
-		var query = "INSERT INTO user_ (username, password) VALUES ($1, $2)"
+		err = user_model.Create(db, body.Username, hash)
 
-		log.Println("inserting user...")
-
-		if _, err := db.Exec(query, body.Username, hash); err != nil {
-			log.Println("failed to insert user", err)
-
-			http.Error(w, "server error", http.StatusInternalServerError)
-			return
+		if err != nil {
+				http.Error(w, "server error", http.StatusInternalServerError)
+				log.Println(err)
+				return
 		}
 
-		var getUserQuery = "SELECT (username, id) FROM user_ WHERE user_.username = ?"
+		log.Println("username:", body.Username)
+		user, err := user_model.FindFromUsername(db, body.Username)
 
-		var res = User{}
-		if err := db.QueryRow(getUserQuery, body.Username).Scan(res); err != nil {
-			log.Println("failed to get user", err)
-			http.Error(w, "server error", http.StatusInternalServerError)
-			return
+		if err != nil {
+				http.Error(w, "server error", http.StatusInternalServerError)
+				log.Println(err)
+				return
 		}
 
 		// Create a JWT token
@@ -80,7 +71,7 @@ func Register(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		})
 
 		log.Println("getting signed string...")
-		tokenString, err := token.SignedString(jwtKey)
+		tokenString, err := token.SignedString(utils.GetJwtSecret())
 
 		if err != nil {
 			log.Println("failed to sign string")
@@ -88,7 +79,7 @@ func Register(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		payload, err := json.Marshal(LoginReturnData{Token: tokenString, User: res})
+		payload, err := json.Marshal(LoginReturnData{Token: tokenString, User: user})
 
 		if err != nil {
 			log.Println("failed to marshal")

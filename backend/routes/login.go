@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	user_model "github.com/benzend/goalboard/models/user"
 	"github.com/benzend/goalboard/utils"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -15,7 +16,6 @@ import (
 
 
 func Login(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-
 	utils.EnableCors(&w)
 
 	var body LoginRequestBody
@@ -36,7 +36,7 @@ func Login(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 
 	// Retrieve hashed password from the database based on the provided username
 	var hashedPassword string
-	var userId string // Assuming userId is needed for other purposes
+	var userId int64 // Assuming userId is needed for other purposes
 	var getUserQuery = "SELECT password, id FROM user_ WHERE username = $1;"
 
 	err = db.QueryRow(getUserQuery, body.Username).Scan(&hashedPassword, &userId)
@@ -59,7 +59,7 @@ func Login(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		"exp":      time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
 	})
 
-	tokenString, err := token.SignedString(jwtKey)
+	tokenString, err := token.SignedString(utils.GetJwtSecret())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -85,8 +85,8 @@ func Login(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	// Return the JWT token and user data
 	responseData := LoginReturnData{
 		Token: tokenString,
-		User: User{
-			Id:       userId,
+		User: user_model.GetUser{
+			ID:       userId,
 			Username: body.Username,
 		},
 	}

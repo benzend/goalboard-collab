@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/benzend/goalboard/pw"
@@ -126,4 +127,41 @@ func TestLoginHandler(t *testing.T) {
 	assert.NotEmpty(t, responseData.Token)
 	assert.Equal(t, userId, responseData.User.ID)
 	assert.Equal(t, username, responseData.User.Username)
+}
+
+func TestLogout(t *testing.T) {
+	// Create a new HTTP request (GET /logout)
+	req, err := http.NewRequest("GET", "/logout", nil)
+	if err != nil {
+		t.Fatal("failed to create request:", err)
+	}
+
+	// Create a mock response recorder
+	rr := httptest.NewRecorder()
+
+	// Create a context (no need for the database in this case)
+	ctx := context.Background()
+
+	// Call the Logout handler function with the mock context, response recorder, and request
+	routes.Logout(ctx, rr, req)
+
+	// Check the response status code
+	if rr.Code != http.StatusSeeOther {
+		t.Errorf("expected status code %d but got %d", http.StatusSeeOther, rr.Code)
+	}
+
+	// Check if the "jwt_token" cookie is cleared
+	cookie := rr.Result().Cookies()[0]
+	if cookie.Name != "jwt_token" || cookie.Value != "" || !cookie.Expires.Before(time.Now()) {
+		t.Error("jwt_token cookie is not cleared or has incorrect attributes")
+	}
+
+	// Check if the response redirects to the login page
+	location, err := rr.Result().Location()
+	if err != nil {
+		t.Fatal("failed to get redirect location:", err)
+	}
+	if location.Path != "/login" {
+		t.Errorf("expected redirect location /login but got %s", location.Path)
+	}
 }

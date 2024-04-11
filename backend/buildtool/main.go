@@ -13,10 +13,10 @@ package main
 // cmd.Stdout = os.Stdout
 // cmd.Stderr = os.Stderr
 */
-import (
-	buildtool "github.com/benzend/goalboard/buildtool/runbuild"
-)
+// import (
+// 	buildtool "github.com/benzend/goalboard/buildtool/runbuild"
+// )
 
-func main() {
-	buildtool.CreateFile()
-}
+// func main() {
+// 	buildtool.CreateFile()
+// }

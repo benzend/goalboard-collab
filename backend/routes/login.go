@@ -14,7 +14,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-
 func Login(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	utils.EnableCors(&w)
 

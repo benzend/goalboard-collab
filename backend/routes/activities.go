@@ -6,14 +6,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/benzend/goalboard/auth"
 	"github.com/benzend/goalboard/utils"
 	_ "github.com/lib/pq"
 )
-
-var timestamp = time.Now().Format(time.RFC3339)
 
 type ActivityProgress struct {
 	Progress string `json:"progress"`

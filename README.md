@@ -1,3 +1,6 @@
+![Header](https://github.com/GwartneyDev/goalboard-collab/blob/main/Capture.png)
+  >Goalboard is under current development, and we are working hard to bring our vison to reality! 
+
 # Goalboard
 
 An application dedicated towards helping users create, track and an emphasis on Goal sharing.

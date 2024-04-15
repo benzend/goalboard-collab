@@ -2,7 +2,6 @@ package UnitTesting
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"testing"
 
@@ -21,49 +20,6 @@ import (
 	"github.com/benzend/goalboard/routes"
 )
 
-// Hypothetical function that performs the query
-func queryUser(ctx context.Context, username string) (int, string, string, error) {
-	db, ok := ctx.Value(utils.CTX_KEY_DB).(*sql.DB)
-	if !ok {
-		return 0, "", "", fmt.Errorf("could not get database connection from context")
-	}
-
-	// This query must match the one expected in the test setup
-	row := db.QueryRow("SELECT id, username, password FROM users WHERE username = ?", username)
-	var id int
-	var uname, password string
-	err := row.Scan(&id, &uname, &password)
-	if err != nil {
-		return 0, "", "", err
-	}
-	return id, uname, password, nil
-}
-
-func TestRoutes(t *testing.T) {
-	t.Run("UserRegister", func(t *testing.T) {
-		db, mock, err := sqlmock.New()
-		if err != nil {
-			t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
-		}
-		defer db.Close()
-
-		mock.ExpectQuery("SELECT id, username, password FROM users WHERE username = ?").
-			WithArgs("testuser").
-			WillReturnRows(sqlmock.NewRows([]string{"id", "username", "password"}).
-				AddRow(1, "testuser", "testpass"))
-
-		ctx := context.Background()
-		ctxWithDB := context.WithValue(ctx, utils.CTX_KEY_DB, db)
-
-		id, uname, pass, err := queryUser(ctxWithDB, "testuser")
-		assert.NoError(t, err)
-		assert.Equal(t, 1, id)
-		assert.Equal(t, "testuser", uname)
-		assert.Equal(t, "testpass", pass)
-
-		assert.NoError(t, mock.ExpectationsWereMet())
-	})
-}
 func TestUserRegistration(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {

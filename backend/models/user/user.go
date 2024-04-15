@@ -7,7 +7,7 @@ import (
 )
 
 type GetUser struct {
-	ID int64 `json:"id"`
+	ID       int64  `json:"id"`
 	Username string `json:"username"`
 }
 
@@ -38,7 +38,6 @@ func FindFromUsername(db *sql.DB, username string) (user GetUser, err error) {
 }
 
 func Create(db *sql.DB, username string, password string) (err error) {
-	log.Println("inserting user...")
 
 	query := "INSERT INTO user_ (username, password) VALUES ($1, $2)"
 

@@ -1,5 +1,6 @@
-host=
-password=
-port=
-user=
-dbname=
+host=db
+password=mysecretpassword
+port=5432
+user=postgres
+dbname=postgres
+hmacSampleSecret=secret

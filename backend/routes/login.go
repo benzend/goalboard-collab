@@ -59,6 +59,7 @@ func Login(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	})
 
 	tokenString, err := token.SignedString(utils.GetJwtSecret())
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

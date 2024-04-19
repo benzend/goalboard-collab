@@ -18,4 +18,5 @@ func Logout(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &cookie)
 
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
+
 }

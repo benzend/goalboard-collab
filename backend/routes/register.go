@@ -8,9 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/benzend/goalboard/pw"
+	user_model "github.com/benzend/goalboard/models/user"
 	"github.com/benzend/goalboard/utils"
-	"github.com/benzend/goalboard/models/user"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -20,89 +19,86 @@ type LoginRequestBody struct {
 }
 
 type LoginReturnData struct {
-	Token string `json:"token"`
-	User user_model.GetUser `json:"user"`
+	Token string             `json:"token"`
+	User  user_model.GetUser `json:"user"`
 }
 
 func Register(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-		utils.EnableCors(&w)
+	utils.EnableCors(&w)
 
-		var body LoginRequestBody
+	var body LoginRequestBody
 
-		err := json.NewDecoder(r.Body).Decode(&body)
+	err := json.NewDecoder(r.Body).Decode(&body)
 
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-		db, ok := ctx.Value(utils.CTX_KEY_DB).(*sql.DB)
+	db, ok := ctx.Value(utils.CTX_KEY_DB).(*sql.DB)
 
-		if !ok {
-			http.Error(w, "server error", http.StatusInternalServerError)
-			return
-		}
+	if !ok {
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
 
-		password := body.Password
-		hash, _ := pw.HashPassword(password) // ignore error for the sake of simplicity
+	password := body.Password
+	//hash, _ := pw.HashPassword(password) // ignore error for the sake of simplicity
 
-		err = user_model.Create(db, body.Username, hash)
+	err = user_model.Create(db, body.Username, password)
 
-		if err != nil {
-				http.Error(w, "server error", http.StatusInternalServerError)
-				log.Println(err)
-				return
-		}
+	if err != nil {
+		http.Error(w, "server error", http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
 
-		log.Println("username:", body.Username)
-		user, err := user_model.FindFromUsername(db, body.Username)
+	user, err := user_model.FindFromUsername(db, body.Username)
 
-		if err != nil {
-				http.Error(w, "server error", http.StatusInternalServerError)
-				log.Println(err)
-				return
-		}
+	if err != nil {
+		http.Error(w, "server error", http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
 
-		// Create a JWT token
-		log.Println("getting token...")
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-			"username": body.Username,
-			"exp":      time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
-		})
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"username": body.Username,
+		"exp":      time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
+	})
 
-		log.Println("getting signed string...")
-		tokenString, err := token.SignedString(utils.GetJwtSecret())
+	log.Println("getting signed string...")
+	tokenString, err := token.SignedString(utils.GetJwtSecret())
 
-		if err != nil {
-			log.Println("failed to sign string")
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	if err != nil {
+		log.Println("failed to sign string")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-		payload, err := json.Marshal(LoginReturnData{Token: tokenString, User: user})
+	payload, err := json.Marshal(LoginReturnData{Token: tokenString, User: user})
 
-		if err != nil {
-			log.Println("failed to marshal")
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	if err != nil {
+		log.Println("failed to marshal")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-		// Set the token in a cookie
-		expiration := time.Now().Add(24 * time.Hour)
-		cookie := http.Cookie{
-			Name:     "jwt_token",
-			Value:    tokenString,
-			Expires:  expiration,
-			HttpOnly: true,
-			Secure:   false, // Set to true if using HTTPS
+	// Set the token in a cookie
+	expiration := time.Now().Add(24 * time.Hour)
+	cookie := http.Cookie{
+		Name:     "jwt_token",
+		Value:    tokenString,
+		Expires:  expiration,
+		HttpOnly: true,
+		Secure:   false, // Set to true if using HTTPS
 
-		}
-		http.SetCookie(w, &cookie)
+	}
+	http.SetCookie(w, &cookie)
 
-		// Return success response
-		w.WriteHeader(http.StatusOK)
+	// Return success response
+	w.WriteHeader(http.StatusOK)
 
-		w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 
-		json.NewEncoder(w).Encode(payload)
+	json.NewEncoder(w).Encode(payload)
 }

@@ -3,6 +3,7 @@ package UnitTesting
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"testing"
@@ -17,12 +18,26 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func TestUserRegistration(t *testing.T) {
-
+func initializeMockDB(ctx context.Context) (context.Context, sqlmock.Sqlmock, error) {
 	db, mock, err := sqlmock.New()
+
 	if err != nil {
-		t.Fatalf("failed to create mock database: %v", err)
+		return nil, nil, fmt.Errorf("failed to create mock database: %v", err)
 	}
+	return context.WithValue(ctx, "db", db), mock, nil
+}
+
+func TestUserRegistration(t *testing.T) {
+	ctx := context.Background()
+
+	// Initialize mock DB and add it to the context
+	ctx, mock, err := initializeMockDB(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Extract DB from the context
+	db := ctx.Value("db").(*sql.DB)
 	defer db.Close()
 
 	// Generate hashed password using bcrypt with a cost of 10
@@ -47,7 +62,7 @@ func TestUserRegistration(t *testing.T) {
 	}
 
 	rr := httptest.NewRecorder()
-	ctx := context.Background()
+
 	ctxWithDB := context.WithValue(ctx, utils.CTX_KEY_DB, db)
 	routes.Register(ctxWithDB, rr, req)
 
@@ -187,3 +202,14 @@ func TestCreateGoals(t *testing.T) {
 		t.Errorf("expected status code %d but got %d", http.StatusOK, rr.Code)
 	}
 }
+
+// func TestGetGoals(t *testing.T) {
+// 	query := "SELECT id, name, target_per_day, long_term_target FROM goal WHERE user_id = $1"
+
+// 	type Goal struct {
+// 		ID             string `json:"id"`
+// 		Name           string `json:"name"`
+// 		TargetPerDay   string `json:"target_per_day"`
+// 		LongTermTarget string `json:"long_term_target"`
+// 	}
+// }

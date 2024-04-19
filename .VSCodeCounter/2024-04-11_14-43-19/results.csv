@@ -1,0 +1,80 @@
+"filename", "language", "Go Checksum File", "Go", "JSON", "Go Module File", "YAML", "HTML", "Docker", "Markdown", "TypeScript", "JSON with Comments", "JavaScript", "TypeScript JSX", "CSS", "XML", "SQL", "comment", "blank", "total"
+"g:\goProj\goalboard-collab\README.md", "Markdown", 0, 0, 0, 0, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 29, 71
+"g:\goProj\goalboard-collab\backend\Dockerfile", "Docker", 0, 0, 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 31
+"g:\goProj\goalboard-collab\backend\UnitTesting\go.sum", "Go Checksum File", 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"g:\goProj\goalboard-collab\backend\UnitTesting\unitTest_test.go", "Go", 0, 115, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 34, 175
+"g:\goProj\goalboard-collab\backend\auth\auth.go", "Go", 0, 55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 17, 76
+"g:\goProj\goalboard-collab\backend\auth\mod.go", "Go", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2
+"g:\goProj\goalboard-collab\backend\buildtool\main.go", "Go", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19, 3, 23
+"g:\goProj\goalboard-collab\backend\buildtool\runbuild\build.go", "Go", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 55, 20, 75
+"g:\goProj\goalboard-collab\backend\database\migrations\000001_create_user_table.down.sql", "SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 2, 5
+"g:\goProj\goalboard-collab\backend\database\migrations\000001_create_user_table.up.sql", "SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 3, 10
+"g:\goProj\goalboard-collab\backend\database\migrations\000002_create_goals_table.down.sql", "SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 3, 6
+"g:\goProj\goalboard-collab\backend\database\migrations\000002_create_goals_table.up.sql", "SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 3, 15
+"g:\goProj\goalboard-collab\backend\database\migrations\000003_create_activity_table.down.sql", "SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 3, 6
+"g:\goProj\goalboard-collab\backend\database\migrations\000003_create_activity_table.up.sql", "SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 4, 14
+"g:\goProj\goalboard-collab\backend\database\mod.go", "Go", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"g:\goProj\goalboard-collab\backend\database\psql.go", "Go", 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 17, 50
+"g:\goProj\goalboard-collab\backend\env\mod.go", "Go", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2
+"g:\goProj\goalboard-collab\backend\env\readfile.go", "Go", 0, 29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 7, 38
+"g:\goProj\goalboard-collab\backend\go.mod", "Go Module File", 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 18
+"g:\goProj\goalboard-collab\backend\go.sum", "Go Checksum File", 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19
+"g:\goProj\goalboard-collab\backend\main.go", "Go", 0, 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 13, 47
+"g:\goProj\goalboard-collab\backend\models\dbQueryModels.go", "Go", 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 6, 25
+"g:\goProj\goalboard-collab\backend\models\goal\goal_model.go", "Go", 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19, 67
+"g:\goProj\goalboard-collab\backend\models\goal\mod.go", "Go", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2
+"g:\goProj\goalboard-collab\backend\models\mod.go", "Go", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2
+"g:\goProj\goalboard-collab\backend\models\user\mod.go", "Go", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2
+"g:\goProj\goalboard-collab\backend\models\user\user.go", "Go", 0, 37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 53
+"g:\goProj\goalboard-collab\backend\pw\check.go", "Go", 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 16
+"g:\goProj\goalboard-collab\backend\pw\mod.go", "Go", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2
+"g:\goProj\goalboard-collab\backend\router\main.go", "Go", 0, 93, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 27, 146
+"g:\goProj\goalboard-collab\backend\router\mod.go", "Go", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2
+"g:\goProj\goalboard-collab\backend\routes\activities.go", "Go", 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 56
+"g:\goProj\goalboard-collab\backend\routes\goals.go", "Go", 0, 156, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 42, 207
+"g:\goProj\goalboard-collab\backend\routes\healthcheck.go", "Go", 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 21
+"g:\goProj\goalboard-collab\backend\routes\login.go", "Go", 0, 70, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 18, 94
+"g:\goProj\goalboard-collab\backend\routes\logout.go", "Go", 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 22
+"g:\goProj\goalboard-collab\backend\routes\mod.go", "Go", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2
+"g:\goProj\goalboard-collab\backend\routes\register.go", "Go", 0, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 26, 109
+"g:\goProj\goalboard-collab\backend\utils\cors.go", "Go", 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 8
+"g:\goProj\goalboard-collab\backend\utils\ctx.go", "Go", 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4
+"g:\goProj\goalboard-collab\backend\utils\invariant.go", "Go", 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 14
+"g:\goProj\goalboard-collab\backend\utils\jwt.go", "Go", 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 21
+"g:\goProj\goalboard-collab\backend\utils\logger.go", "Go", 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 8, 29
+"g:\goProj\goalboard-collab\backend\utils\mod.go", "Go", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2
+"g:\goProj\goalboard-collab\compose.yaml", "YAML", 0, 0, 0, 0, 62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 69
+"g:\goProj\goalboard-collab\frontend\.eslintrc.cjs", "JavaScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 1, 19
+"g:\goProj\goalboard-collab\frontend\Dockerfile", "Docker", 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10, 27
+"g:\goProj\goalboard-collab\frontend\README.md", "Markdown", 0, 0, 0, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 9, 31
+"g:\goProj\goalboard-collab\frontend\index.html", "HTML", 0, 0, 0, 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 14
+"g:\goProj\goalboard-collab\frontend\package-lock.json", "JSON", 0, 0, 4261, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4262
+"g:\goProj\goalboard-collab\frontend\package.json", "JSON", 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 34
+"g:\goProj\goalboard-collab\frontend\postcss.config.js", "JavaScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 1, 7
+"g:\goProj\goalboard-collab\frontend\public\vite.svg", "XML", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1
+"g:\goProj\goalboard-collab\frontend\src\Home.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41, 0, 0, 0, 0, 3, 44
+"g:\goProj\goalboard-collab\frontend\src\Login.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 69, 0, 0, 0, 22, 15, 106
+"g:\goProj\goalboard-collab\frontend\src\Register.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 97, 0, 0, 0, 15, 20, 132
+"g:\goProj\goalboard-collab\frontend\src\UserActivitiesNew.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 94, 0, 0, 0, 1, 13, 108
+"g:\goProj\goalboard-collab\frontend\src\UserGoals.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 36, 0, 0, 0, 8, 5, 49
+"g:\goProj\goalboard-collab\frontend\src\UserGoalsNew.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 97, 0, 0, 0, 0, 14, 111
+"g:\goProj\goalboard-collab\frontend\src\assets\react.svg", "XML", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1
+"g:\goProj\goalboard-collab\frontend\src\components\Button.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 0, 0, 0, 5, 26
+"g:\goProj\goalboard-collab\frontend\src\components\Heading.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 0, 0, 0, 0, 5, 32
+"g:\goProj\goalboard-collab\frontend\src\components\Input.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 5, 29
+"g:\goProj\goalboard-collab\frontend\src\components\Nav.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 2, 14
+"g:\goProj\goalboard-collab\frontend\src\components\Select.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 5, 29
+"g:\goProj\goalboard-collab\frontend\src\constants.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 2
+"g:\goProj\goalboard-collab\frontend\src\index.css", "CSS", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 1, 4
+"g:\goProj\goalboard-collab\frontend\src\main.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 46, 0, 0, 0, 0, 6, 52
+"g:\goProj\goalboard-collab\frontend\src\utils\activity.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 19, 0, 0, 0, 0, 0, 0, 0, 4, 23
+"g:\goProj\goalboard-collab\frontend\src\utils\goal.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 7, 28
+"g:\goProj\goalboard-collab\frontend\src\utils\loader-data.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 2, 8
+"g:\goProj\goalboard-collab\frontend\src\utils\user.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 43, 0, 0, 0, 0, 0, 0, 0, 11, 54
+"g:\goProj\goalboard-collab\frontend\src\vite-env.d.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2
+"g:\goProj\goalboard-collab\frontend\tailwind.config.js", "JavaScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 0, 0, 0, 0, 1, 1, 13
+"g:\goProj\goalboard-collab\frontend\tsconfig.json", "JSON with Comments", 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 2, 3, 26
+"g:\goProj\goalboard-collab\frontend\tsconfig.node.json", "JSON", 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 11
+"g:\goProj\goalboard-collab\frontend\vite.config.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 1, 2, 8
+"g:\goProj\goalboard-collab\package-lock.json", "JSON", 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7
+"Total", "-", 21, 905, 4310, 14, 62, 13, 33, 64, 95, 21, 35, 588, 3, 2, 38, 218, 555, 6977

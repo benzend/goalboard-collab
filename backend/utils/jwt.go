@@ -8,9 +8,8 @@ import (
 
 func GetJwtSecret() []byte {
 	env, err := env.ReadFile(".env")
-
 	if err != nil {
-		fmt.Print("failed to read env")
+		fmt.Println("Failed to read .env file:", err)
 		return nil
 	}
 

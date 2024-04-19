@@ -31,6 +31,16 @@ services:
     depends_on:
       db:
         condition: service_healthy
+ 
+
+  tests:
+      image: golang:latest
+      volumes:
+        - ./backend:/code
+      working_dir: /code
+      command: go test ./UnitTesting -count=1 
+      networks:
+        - server-side
 
   db:
     image: postgres:16-alpine

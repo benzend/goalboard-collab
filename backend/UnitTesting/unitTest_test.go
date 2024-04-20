@@ -3,6 +3,7 @@ package UnitTesting
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"testing"
@@ -17,12 +18,26 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func TestUserRegistration(t *testing.T) {
-
+func initializeMockDB(ctx context.Context) (context.Context, sqlmock.Sqlmock, error) {
 	db, mock, err := sqlmock.New()
+
 	if err != nil {
-		t.Fatalf("failed to create mock database: %v", err)
+		return nil, nil, fmt.Errorf("failed to create mock database: %v", err)
 	}
+	return context.WithValue(ctx, "db", db), mock, nil
+}
+
+func TestUserRegistration(t *testing.T) {
+	ctx := context.Background()
+
+	// Initialize mock DB and add it to the context
+	ctx, mock, err := initializeMockDB(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Extract DB from the context
+	db := ctx.Value("db").(*sql.DB)
 	defer db.Close()
 
 	// Generate hashed password using bcrypt with a cost of 10
@@ -47,7 +62,7 @@ func TestUserRegistration(t *testing.T) {
 	}
 
 	rr := httptest.NewRecorder()
-	ctx := context.Background()
+
 	ctxWithDB := context.WithValue(ctx, utils.CTX_KEY_DB, db)
 	routes.Register(ctxWithDB, rr, req)
 
@@ -59,22 +74,29 @@ func TestUserRegistration(t *testing.T) {
 }
 
 func TestUserLogin(t *testing.T) {
+	ctx := context.Background()
 
-	// Create a mock database connection
-	db, mock, err := sqlmock.New()
+	// Initialize mock DB and add it to the context
+	ctx, mock, err := initializeMockDB(ctx)
 	if err != nil {
-		t.Fatalf("failed to create mock database: %v", err)
+		t.Fatal(err)
 	}
+
+	// Extract DB from the context
+	db := ctx.Value("db").(*sql.DB)
 	defer db.Close()
 
 	username := "testuser"
 	password := "testpass"
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+
 	if err != nil {
 		t.Fatalf("failed to hash password: %v", err)
 	}
 
 	userId := int64(123)
+
 	mock.ExpectQuery("SELECT password, id FROM user_ WHERE username = ?").
 		WithArgs(username).
 		WillReturnRows(sqlmock.NewRows([]string{"password", "id"}).AddRow(hashedPassword, userId))
@@ -95,7 +117,7 @@ func TestUserLogin(t *testing.T) {
 		t.Fatalf("failed to create HTTP request: %v", err)
 	}
 	rr := httptest.NewRecorder()
-	ctx := context.Background()
+
 	ctxWithDB := context.WithValue(ctx, utils.CTX_KEY_DB, db)
 	routes.Login(ctxWithDB, rr, req)
 
@@ -109,6 +131,7 @@ func TestUserLogin(t *testing.T) {
 func TestUserLogout(t *testing.T) {
 	// Create a mock HTTP request with any necessary headers
 	req, err := http.NewRequest("GET", "/logout", nil)
+
 	if err != nil {
 		t.Fatalf("failed to create HTTP request: %v", err)
 	}
@@ -172,7 +195,7 @@ func TestCreateGoals(t *testing.T) {
 	}
 
 	// Crate the HTTP request
-	req, err := http.NewRequest("POST", "/", bytes.NewBuffer(reqBody))
+	req, err := http.NewRequest("POST", "/goals", bytes.NewBuffer(reqBody))
 	if err != nil {
 		t.Fatalf("failed to create HTTP request: %v", err)
 	}
@@ -180,6 +203,59 @@ func TestCreateGoals(t *testing.T) {
 	ctx := context.Background()
 	ctxWithDB := context.WithValue(ctx, utils.CTX_KEY_DB, db)
 	routes.CreateGoal(ctxWithDB, rr, req)
+
+	// Verify expectations and HTTP status code
+	assert.NoError(t, mock.ExpectationsWereMet())
+	if rr.Code != http.StatusOK {
+		t.Errorf("expected status code %d but got %d", http.StatusOK, rr.Code)
+	}
+}
+func TestGetGoals(t *testing.T) {
+	ctx := context.Background()
+
+	// Initialize mock DB and add it to the context
+	ctx, mock, err := initializeMockDB(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Extract DB from the context
+	db := ctx.Value("db").(*sql.DB)
+	defer db.Close()
+
+	username := "testuser"
+	password := "testpass"
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+
+	if err != nil {
+		t.Fatalf("failed to hash password: %v", err)
+	}
+
+	userId := int64(123)
+
+	mock.ExpectQuery("").
+		WithArgs(username).
+		WillReturnRows(sqlmock.NewRows([]string{}).AddRow(hashedPassword, userId))
+
+	// Prepare the request body
+	requestBody := map[string]interface{}{|
+		
+	}
+	reqBody, err := json.Marshal(requestBody)
+	if err != nil {
+		t.Fatalf("failed to marshal request body: %v", err)
+	}
+
+	// Crate the HTTP request
+	req, err := http.NewRequest("POST", "/login", bytes.NewBuffer(reqBody))
+	if err != nil {
+		t.Fatalf("failed to create HTTP request: %v", err)
+	}
+	rr := httptest.NewRecorder()
+
+	ctxWithDB := context.WithValue(ctx, utils.CTX_KEY_DB, db)
+	routes.Login(ctxWithDB, rr, req)
 
 	// Verify expectations and HTTP status code
 	assert.NoError(t, mock.ExpectationsWereMet())

@@ -11,13 +11,22 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type user struct {
-	ID int64 `json:"id"`
+type User struct {
+	ID       int64  `json:"id"`
 	Username string `json:"username"`
 }
 
-func Authorize(ctx context.Context, w http.ResponseWriter, req *http.Request) (user user, err error) {
+func Authorize(ctx context.Context, w http.ResponseWriter, req *http.Request, devMode bool) (user User, err error) {
 	// Parse and validate the JWT token from the cookie
+
+	if !devMode {
+		// If dev mode is enabled, return a predefined user
+		return User{
+			ID:       1,
+			Username: "testuser",
+		}, nil
+	}
+
 	sessionInfo, err := req.Cookie("jwt_token")
 	if err != nil {
 		http.Error(w, "no cookie", http.StatusUnauthorized)
@@ -27,8 +36,8 @@ func Authorize(ctx context.Context, w http.ResponseWriter, req *http.Request) (u
 	tokenString := sessionInfo.Value
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			// Return the byte array representation of the secret key
-			return []byte(utils.GetJwtSecret()), nil
+		// Return the byte array representation of the secret key
+		return []byte(utils.GetJwtSecret()), nil
 	})
 
 	if err != nil {

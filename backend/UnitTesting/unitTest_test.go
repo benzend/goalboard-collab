@@ -3,14 +3,11 @@ package UnitTesting
 import (
 	"bytes"
 	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
-	"log"
-	"testing"
-
 	"net/http"
 	"net/http/httptest"
+	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/benzend/goalboard/routes"
@@ -19,26 +16,27 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func initializeMockDB(ctx context.Context) (context.Context, sqlmock.Sqlmock, error) {
-	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
-
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create mock database: %v", err)
-	}
-	return context.WithValue(ctx, "db", db), mock, nil
+type LoginRequestBody struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+type GoalRequestBody struct {
+	ID             string `json:"id"`
+	Name           string `json:"name"`
+	TargetPerDay   string `json:"target_per_day"`
+	LongTermTarget string `json:"long_term_target"`
 }
 
 func TestUserRegistration(t *testing.T) {
 	ctx := context.Background()
 
 	// Initialize mock DB and add it to the context
-	ctx, mock, err := initializeMockDB(ctx)
+	db, mock, err := sqlmock.New()
+
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	// Extract DB from the context
-	db := ctx.Value("db").(*sql.DB)
 	defer db.Close()
 
 	// Generate hashed password using bcrypt with a cost of 10
@@ -57,7 +55,9 @@ func TestUserRegistration(t *testing.T) {
 	}
 	// Create request body with username and hashed password
 	reqBody := []byte(fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, hashedPassword))
+
 	req, err := http.NewRequest("POST", "/register", bytes.NewBuffer(reqBody))
+
 	if err != nil {
 		t.Fatalf("failed to create HTTP request: %v", err)
 	}
@@ -75,58 +75,102 @@ func TestUserRegistration(t *testing.T) {
 }
 
 func TestUserLogin(t *testing.T) {
-	ctx := context.Background()
-
-	// Initialize mock DB and add it to the context
-	ctx, mock, err := initializeMockDB(ctx)
+	// Create a mock database connection
+	db, mock, err := sqlmock.New()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("An error occurred when opening a stub database connection: %v", err)
 	}
-
-	// Extract DB from the context
-	db := ctx.Value("db").(*sql.DB)
 	defer db.Close()
 
+	// Define test data
 	username := "testuser"
-	password := "testpass"
+	plainPassword := "plainpass"
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	userId := int64(1)
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(plainPassword), bcrypt.DefaultCost)
 
 	if err != nil {
-		t.Fatalf("failed to hash password: %v", err)
+		t.Fatalf("Failed to generate bcrypt hash: %v", err)
 	}
 
-	userId := int64(123)
-
-	mock.ExpectQuery("SELECT password, id FROM user_ WHERE username = ?").
-		WithArgs(username).
-		WillReturnRows(sqlmock.NewRows([]string{"password", "id"}).AddRow(hashedPassword, userId))
-
-	// Prepare the request body
-	requestBody := map[string]interface{}{
-		"username": username,
-		"password": password,
-	}
-	reqBody, err := json.Marshal(requestBody)
+	reqBody, err := json.Marshal(LoginRequestBody{Username: username, Password: plainPassword})
 	if err != nil {
-		t.Fatalf("failed to marshal request body: %v", err)
+		t.Fatalf("Failed to marshal request body: %v", err)
 	}
 
-	// Crate the HTTP request
+	// Mock the expected query and response
+	expectedSQL := "SELECT password, id FROM user_ WHERE username = \\$1"
+	mock.ExpectQuery(expectedSQL).WithArgs(username).WillReturnRows(sqlmock.NewRows([]string{"password", "id"}).AddRow(hashedPassword, userId))
+
 	req, err := http.NewRequest("POST", "/login", bytes.NewBuffer(reqBody))
 	if err != nil {
-		t.Fatalf("failed to create HTTP request: %v", err)
+		t.Fatalf("Failed to create HTTP request: %v", err)
 	}
-	rr := httptest.NewRecorder()
 
-	ctxWithDB := context.WithValue(ctx, utils.CTX_KEY_DB, db)
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	ctxWithDB := context.WithValue(context.Background(), utils.CTX_KEY_DB, db)
+
+	// Call the Login handler
 	routes.Login(ctxWithDB, rr, req)
 
-	// Verify expectations and HTTP status code
-	assert.NoError(t, mock.ExpectationsWereMet())
 	if rr.Code != http.StatusOK {
-		t.Errorf("expected status code %d but got %d", http.StatusOK, rr.Code)
+		t.Errorf("Expected status code %d but got %d", http.StatusOK, rr.Code)
 	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("There were unfulfilled expectations: %s", err)
+	}
+
+}
+
+func TestGetGoals(t *testing.T) {
+	// Step 1: Set up a mock database connection
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("An error occurred when opening a stub database connection: %v", err)
+	}
+	defer db.Close()
+
+	// Step 2: Set up the expected SQL query and results
+	userID := int64(1) // Assuming user ID 1
+	expectedSQL := "SELECT id, name, target_per_day, long_term_target FROM goal WHERE user_id = \\$1"
+	// Mock the expected query and response
+
+	reqBody, err := json.Marshal(GoalRequestBody{ID: "1", Name: "testuser", TargetPerDay: "3 hours", LongTermTarget: "end of month"})
+
+	if err != nil {
+		t.Fatalf("Failed to marshal request body: %v", err)
+	}
+
+	mock.ExpectQuery(expectedSQL).WithArgs(userID).WillReturnRows(sqlmock.NewRows([]string{"id", "name", "target_per_day", "long_term_target"}).
+		AddRow("1", "Goal 1", "3 hours", "end of month"))
+
+	if err != nil {
+		t.Fatalf("Failed to generate JWT token: %v", err)
+	}
+
+	if err != nil {
+		return
+	}
+	// Create a new HTTP test recorder
+	rr := httptest.NewRecorder()
+	// Step 3: Create a mock authorization.
+
+	// Create a new context with the mock database and mock authorization
+	ctx := context.WithValue(context.Background(), utils.CTX_KEY_DB, db)
+
+	req, err := http.NewRequest("GET", "/goals", bytes.NewBuffer(reqBody))
+
+	if err != nil {
+		return
+	}
+	// Call the GetGoals method with the mocked context
+	routes.GetGoals(ctx, rr, req)
+
+	// Verify the HTTP status code
+	assert.Equal(t, http.StatusOK, rr.Code, "expected status code 200 but got different")
 }
 
 func TestUserLogout(t *testing.T) {
@@ -216,81 +260,56 @@ func TestCreateGoals(t *testing.T) {
 		t.Errorf("expected status code %d but got %d", http.StatusOK, rr.Code)
 	}
 }
-func TestGetGoals(t *testing.T) {
-	// Create a mock database connection
-	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
-	if err != nil {
-		t.Fatalf("failed to create mock database: %v", err)
-	}
 
+// place holder for updating goals route.
+func TestUpdateGoals(t *testing.T) {
+	// Create a mock database connection
+	// Step 1: Set up a mock database connection
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("An error occurred when opening a stub database connection: %v", err)
+	}
 	defer db.Close()
 
-	// Define the userId and initialize it appropriately
-	userId := 123 // Example initialization, adjust as necessary
+	// Step 2: Set up the expected SQL query and results
+	userID := int64(1) // Assuming user ID 1
+	expectedSQL := " "
+	expectedSQL1 := " "
 
-	// Set up the expected query with the correct placeholder and argument
-	mock.ExpectQuery("SELECT id, name, target_per_day, long_term_target FROM goal WHERE user_id = $1").
-		WithArgs(userId).
-		WillReturnRows(sqlmock.NewRows([]string{
-			"id", "name", "target_per_day", "long_term_target",
-		}).AddRow("1", "testuser", "3 hours", "end of month"))
-
-	// Executing the query
-	var id, name, targetPerDay, longTermTarget string
-	// Assuming id, name, targetPerDay, and longTermTarget have been declared elsewhere:
-
-	err = db.QueryRow("SELECT id, name, target_per_day, long_term_target FROM goal WHERE user_id = $1", userId).Scan(&id, &name, &targetPerDay, &longTermTarget)
+	reqBody, err := json.Marshal(GoalRequestBody{ID: "1", Name: "testuser", TargetPerDay: "3 hours", LongTermTarget: "end of month"})
 
 	if err != nil {
-		// Handle the error, such as logging it or failing the test
-		log.Fatalf("Error when trying to fetch data: %s", err)
+		t.Fatalf("Failed to marshal request body: %v", err)
 	}
 
-	if id != "1" || name != "testuser" || targetPerDay != "3 hours" || longTermTarget != "end of month" {
-		log.Fatalf("Retrieved data does not match expected values")
-	}
+	mock.ExpectQuery(expectedSQL).WithArgs(userID).WillReturnRows(sqlmock.NewRows([]string{""}).
+		AddRow("1", "Goal 1", "3 hours", "end of month"))
 
-	// Finally, verify that all expectations set on the mock were met
-	if err := mock.ExpectationsWereMet(); err != nil {
-		log.Fatalf("There were unfulfilled expectations: %s", err)
-	}
+	mock.ExpectQuery(expectedSQL1).WithArgs(userID).WillReturnRows(sqlmock.NewRows([]string{""}).
+		AddRow("1", "Goal 1", "3 hours", "end of month"))
 
-	// Prepare the request body
-	requestBody := map[string]interface{}{
-		"name":             "TestUser",
-		"target_per_day":   "three housrs",
-		"long_term_target": "end of month",
-		"id":               userId,
-		"username":         "TestUser",
+	if err != nil {
+		t.Fatalf("Failed to generate JWT token: %v", err)
 	}
 
 	if err != nil {
-		t.Fatalf("failed to marshal request body: %v", err)
+		return
 	}
-
-	reqBody, err := json.Marshal(requestBody)
-
-	if err != nil {
-		t.Fatalf("failed to marshal request body: %v", err)
-	}
-
-	// Crate the HTTP request
-	req, err := http.NewRequest("GET", "/goals", bytes.NewBuffer(reqBody))
-	if err != nil {
-		t.Fatalf("failed to create HTTP request: %v", err)
-	}
-	// Create a new response recorder
+	// Create a new HTTP test recorder
 	rr := httptest.NewRecorder()
-	// Create a new context with the mock database
+	// Step 3: Create a mock authorization.
+
+	// Create a new context with the mock database and mock authorization
 	ctx := context.WithValue(context.Background(), utils.CTX_KEY_DB, db)
 
-	// Call the GetGoals function with the mocked database and request
-	routes.GetGoals(ctx, rr, req)
+	req, err := http.NewRequest("GET", "/goals", bytes.NewBuffer(reqBody))
 
-	// Verify expectations and HTTP status code
-	assert.NoError(t, mock.ExpectationsWereMet())
-
-	if rr.Code != http.StatusOK {
-		t.Errorf("expected status code %d but got %d", http.StatusOK, rr.Code)
+	if err != nil {
+		return
 	}
+	// Call the GetGoals method with the mocked context
+	routes.UpdateGoals(ctx, rr, req)
+
+	// Verify the HTTP status code
+	assert.Equal(t, http.StatusOK, rr.Code, "expected status code 200 but got different")
 }

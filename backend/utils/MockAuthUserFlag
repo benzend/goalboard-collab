@@ -1,0 +1,34 @@
+// MockAuthorize is a mock implementation of the authorization method
+package utils
+
+import (
+	"context"
+	"fmt"
+	"net/http"
+
+	"github.com/benzend/goalboard/auth"
+)
+
+type MockUser struct {
+	ID int
+}
+
+func AuthWrapper(ctx context.Context, w http.ResponseWriter, req *http.Request, settings map[string]interface{}) (*auth.User, error) {
+	var devMode bool
+
+	// Check if "devMode" is present in the map and is a boolean
+	if val, ok := settings["devMode"].(bool); ok {
+		devMode = val
+	} else {
+		return nil, fmt.Errorf("devMode key not found or not a bool")
+	}
+
+	// Call the Authorize function with the devMode parameter
+	user, err := auth.Authorize(ctx, w, req, devMode)
+	if err != nil {
+		return nil, err
+	}
+
+	// Return a pointer to the authorized user
+	return &user, nil
+}

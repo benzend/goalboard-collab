@@ -31,7 +31,7 @@ const router = createBrowserRouter([
         element: <Login />,
       },
       {
-        path: '/:userId/goals',
+        path: '/goals',
         element: <UserGoals />,
 
         loader: userGoalsLoader,

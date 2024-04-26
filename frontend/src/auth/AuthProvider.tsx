@@ -38,6 +38,8 @@ export const AuthProvider = () => {
       if (res) {
         setUser(res.user);
         setToken(res.token);
+				console.log('setting cookie...');
+				document.cookie = `jwt_token=${res.token}`;
         localStorage.setItem('site', res.token);
         navigate(`/${res.user.id}/goals`);
         return;

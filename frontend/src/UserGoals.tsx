@@ -5,10 +5,7 @@ import { Heading } from './components/Heading';
 import { getGoals } from './utils/goal';
 
 export const loader = (async ({ params }) => {
-  // TODO: redirect to login if user unauthed
-  if (!params.userId) throw new Error('no userId');
-
-  return { goals: await getGoals(params.userId) };
+  return { goals: await getGoals() };
 }) satisfies LoaderFunction;
 
 export const UserGoals = () => {

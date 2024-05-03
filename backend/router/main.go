@@ -44,60 +44,60 @@ type router struct {
 }
 
 func NewRouter() router {
-	return router {
+	return router{
 		// maps need to be initialized in order for them to be usable
 		routes: make(map[string]RouteMethod),
-		paths: make(map[string]bool),
+		paths:  make(map[string]bool),
 	}
 }
 
-func (r* router) Get(path string, handle Handle) {
+func (r *router) Get(path string, handle Handle) {
 	if routes, ok := r.routes[path]; ok {
 		routes.Get = handle
 		r.routes[path] = routes
 	} else {
-		r.routes[path] = RouteMethod{ Get: handle }
+		r.routes[path] = RouteMethod{Get: handle}
 	}
 	r.paths[path] = true
 }
 
-func (r* router) Post(path string, handle Handle) {
+func (r *router) Post(path string, handle Handle) {
 	if routes, ok := r.routes[path]; ok {
 		routes.Post = handle
 		r.routes[path] = routes
 	} else {
-		r.routes[path] = RouteMethod{ Post: handle }
+		r.routes[path] = RouteMethod{Post: handle}
 	}
 	r.paths[path] = true
 }
 
-func (r* router) Put(path string, handle Handle) {
+func (r *router) Put(path string, handle Handle) {
 	if routes, ok := r.routes[path]; ok {
 		routes.Put = handle
 		r.routes[path] = routes
 	} else {
-		r.routes[path] = RouteMethod{ Put: handle }
+		r.routes[path] = RouteMethod{Put: handle}
 	}
 	r.paths[path] = true
 }
 
-func (r* router) Delete(path string, handle Handle) {
+func (r *router) Delete(path string, handle Handle) {
 	if routes, ok := r.routes[path]; ok {
 		routes.Delete = handle
 		r.routes[path] = routes
 	} else {
-		r.routes[path] = RouteMethod{ Delete: handle }
+		r.routes[path] = RouteMethod{Delete: handle}
 	}
 	r.paths[path] = true
 }
 
-func (r* router) Ctx(ctx context.Context) {
+func (r *router) Ctx(ctx context.Context) {
 	r.ctx = ctx
 }
 
 // ! the final sendoff - always make sure to run this at the very end
 // ! otherwise you'll wonder why your routes aren't working
-func (router* router) Build() {
+func (router *router) Build() {
 	// remember how i said router.paths are used for indexing? here u go
 	for k := range router.paths {
 		path := k
@@ -107,7 +107,7 @@ func (router* router) Build() {
 			panic("idk what the hell you did, but it aint working")
 		}
 
-		http.HandleFunc(path, func(w http.ResponseWriter, r* http.Request) {
+		http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 			log.Println(fmt.Sprintf("started - %v %v", r.Method, path))
 
 			if r.Method == http.MethodGet && routesInPath.Get != nil {
@@ -136,10 +136,10 @@ func (router* router) Build() {
 }
 
 type RouteMethod struct {
-	Get Handle
-	Post Handle
-	Put Handle
+	Get    Handle
+	Post   Handle
+	Put    Handle
 	Delete Handle
 }
 
-type Handle func(ctx context.Context, w http.ResponseWriter, r* http.Request)
+type Handle func(ctx context.Context, w http.ResponseWriter, r *http.Request)

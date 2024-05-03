@@ -9,7 +9,6 @@ import (
 	"github.com/benzend/goalboard/database"
 	"github.com/benzend/goalboard/router"
 	"github.com/benzend/goalboard/routes"
-	"github.com/benzend/goalboard/utils"
 )
 
 func main() {
@@ -22,12 +21,12 @@ func main() {
 	}
 
 	// put the db value into the context to be used in fns
-	ctx = context.WithValue(ctx, utils.CTX_KEY_DB, db)
 
 	defer db.Close()
 
 	// var newGoal models.Goal4
 	router := router.NewRouter()
+
 	router.Ctx(ctx)
 
 	router.Get("/healthcheck", routes.HealthCheck)

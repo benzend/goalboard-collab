@@ -4,8 +4,8 @@ import { LoaderData } from './utils/loader-data';
 import { Heading } from './components/Heading';
 import { getGoals } from './utils/goal';
 
-export const loader = (async ({ params }) => {
-  return { goals: await getGoals() };
+export const loader = (async () => {
+  return await getGoals();
 }) satisfies LoaderFunction;
 
 export const UserGoals = () => {

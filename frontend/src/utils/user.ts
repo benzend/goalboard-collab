@@ -26,7 +26,9 @@ export type CreateUserReturnData = {
 export async function createUser(
   data: CreateUserData
 ): Promise<CreateUserReturnData> {
-  const res = await fetch('http://localhost:8000/CreateUser', {
+  console.log('you know, youre supposed to refresh');
+  const res = await fetch('http://localhost:8000/register', {
+    mode: 'cors',
     body: JSON.stringify(data),
     method: 'POST',
   });

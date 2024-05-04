@@ -38,7 +38,8 @@ func Register(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	db, ok := ctx.Value(utils.CTX_KEY_DB).(*sql.DB)
 
 	if !ok {
-		http.Error(w, "server error", http.StatusInternalServerError)
+		http.Error(w, "server error: failed to connect db", http.StatusInternalServerError)
+		log.Println("failed to grab db")
 		return
 	}
 
@@ -48,7 +49,7 @@ func Register(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	err = user_model.Create(db, body.Username, password)
 
 	if err != nil {
-		http.Error(w, "server error", http.StatusInternalServerError)
+		http.Error(w, "server error: failed to create user", http.StatusInternalServerError)
 		log.Println(err)
 		return
 	}
@@ -56,7 +57,7 @@ func Register(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	user, err := user_model.FindFromUsername(db, body.Username)
 
 	if err != nil {
-		http.Error(w, "server error", http.StatusInternalServerError)
+		http.Error(w, "server error: failed to find user", http.StatusInternalServerError)
 		log.Println(err)
 		return
 	}

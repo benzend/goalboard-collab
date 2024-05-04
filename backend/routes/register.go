@@ -76,13 +76,7 @@ func Register(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	payload, err := json.Marshal(LoginReturnData{Token: tokenString, User: user})
-
-	if err != nil {
-		log.Println("failed to marshal")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	payload := map[string]any {"token": tokenString, "user": user}
 
 	// Set the token in a cookie
 	expiration := time.Now().Add(24 * time.Hour)

@@ -7,7 +7,7 @@ export type Goal = {
 };
 
 export async function getGoals(): Promise<Goal[]> {
-  const res = await fetch(`http://localhost:8000/goals`, { credentials: 'include' });
+  const res = await fetch(`http://localhost:8000/goals`);
 
   if (!res.ok) throw new Error('failed to fetch goals');
 
@@ -19,7 +19,6 @@ export async function createGoal(data: CreateGoalData): Promise<Goal> {
   const res = await fetch(`http://localhost:8000/goals`, {
     method: 'POST',
     body: JSON.stringify(data),
-		credentials: 'include',
   });
 
   if (!res.ok) throw new Error('failed to create new goal');

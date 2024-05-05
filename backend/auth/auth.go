@@ -16,16 +16,8 @@ type User struct {
 	Username string `json:"username"`
 }
 
-func Authorize(ctx context.Context, w http.ResponseWriter, req *http.Request, devMode bool) (user User, err error) {
+func Authorize(ctx context.Context, w http.ResponseWriter, req *http.Request) (user User, err error) {
 	// Parse and validate the JWT token from the cookie
-
-	if !devMode {
-		// If dev mode is enabled, return a predefined user
-		return User{
-			ID:       1,
-			Username: "testuser",
-		}, nil
-	}
 
 	sessionInfo, err := req.Cookie("jwt_token")
 	if err != nil {

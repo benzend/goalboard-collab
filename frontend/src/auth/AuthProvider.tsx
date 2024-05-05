@@ -38,10 +38,10 @@ export const AuthProvider = () => {
       if (res) {
         setUser(res.user);
         setToken(res.token);
-				console.log('setting cookie...');
-				document.cookie = `jwt_token=${res.token}`;
+        console.log('setting cookie...');
+        document.cookie = `jwt_token=${res.token}`;
         localStorage.setItem('site', res.token);
-        navigate(`/${res.user.id}/goals`);
+        // navigate(`/${res.user.id}/goals`);
         return;
       } else {
         throw new Error('failed to sign in');
@@ -55,7 +55,7 @@ export const AuthProvider = () => {
     setUser(null);
     setToken('');
     localStorage.removeItem('site');
-    navigate('/login');
+    // navigate('/login');
   };
 
   const register = async (data: RegisterActionData) => {
@@ -69,8 +69,9 @@ export const AuthProvider = () => {
       if (res) {
         setUser(res.user);
         setToken(res.token);
+        document.cookie = `jwt_token=${res.token}`;
         localStorage.setItem('site', res.token);
-        navigate(`/${res.user.id}/goals/new`);
+        navigate('/goals');
         return;
       }
 

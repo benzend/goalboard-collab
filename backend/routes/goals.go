@@ -27,17 +27,8 @@ var setMap = map[string]interface{}{
 }
 
 func AuthWrapper(ctx context.Context, w http.ResponseWriter, req *http.Request, settings map[string]interface{}) (*auth.User, error) {
-	var devMode bool
-
-	// Check if "devMode" is present in the map and is a boolean
-	if val, ok := settings["devMode"].(bool); ok {
-		devMode = val
-	} else {
-		return nil, fmt.Errorf("devMode key not found or not a bool")
-	}
-
 	// Call the Authorize function with the devMode parameter
-	user, err := auth.Authorize(ctx, w, req, devMode)
+	user, err := auth.Authorize(ctx, w, req)
 	if err != nil {
 		return nil, err
 	}
@@ -50,9 +41,10 @@ func CreateGoal(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 	utils.EnableCors(&w)
 
 	// Call the authorization function with the new context
-	user, err := AuthWrapper(ctx, w, req, setMap)
+	user, err := auth.Authorize(ctx, w, req)
 
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	var body setGoal

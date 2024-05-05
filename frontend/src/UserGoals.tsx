@@ -15,7 +15,7 @@ export const UserGoals = () => {
       <Nav />
 
       <main className="px-10 pt-10">
-        {data.goals.length ? (
+        {data.goals && data.goals.length ? (
           data.goals.map((g) => {
             // TODO: handle real goals
             return (

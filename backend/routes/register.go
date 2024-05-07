@@ -85,7 +85,6 @@ func Register(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		Value:    tokenString,
 		Expires:  expiration,
 		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
 		Secure:   false, // Set to true if using HTTPS
 
 	}

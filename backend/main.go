@@ -45,7 +45,7 @@ func main() {
 
 	port := 8000
 
-	log.Printf("Listening for requests at port http://localhost:%v/", port)
+	log.Printf("Listening for requests at port %v", port)
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf("localhost:%v", port), nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", port), nil))
 }

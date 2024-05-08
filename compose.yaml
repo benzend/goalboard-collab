@@ -4,8 +4,6 @@ services:
     build:
       context: frontend
       target: development
-    ports:
-      - 5173:5173
     volumes:
       - ./frontend/src:/code/src:ro
     networks:
@@ -23,24 +21,37 @@ services:
       - PG_PASSWORD=mysecretpassword
     volumes:
       - ./backend:/code:ro
-    ports:
-      - 8000:8000
     networks:
       - server-side
       - client-side
     depends_on:
       db:
         condition: service_healthy
- 
 
   tests:
-      image: golang:latest
-      volumes:
-        - ./backend:/code
-      working_dir: /code
-      command: go test ./UnitTesting -count=1 
-      networks:
-        - server-side
+    image: golang:latest
+    volumes:
+      - ./backend:/code
+    working_dir: /code
+    command: go test ./UnitTesting -count=1
+    networks:
+      - server-side
+
+  proxy:
+    image: nginx
+    volumes:
+      - type: bind
+        source: ./proxy/nginx.conf
+        target: /etc/nginx/conf.d/default.conf
+        read_only: true
+    ports:
+      - 8080:80
+    networks:
+      - client-side
+      - server-side
+    depends_on:
+      - backend
+      - frontend
 
   db:
     image: postgres:16-alpine

@@ -10,7 +10,13 @@ RUN go mod download
 
 ADD . .
 
+FROM base AS test
+
+ENV env=TEST
+
 FROM base AS development
+
+ENV env=DEVELOPMENT
 
 CMD [ "go", "run", "." ]
 

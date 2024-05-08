@@ -4,11 +4,8 @@ import { LoaderData } from './utils/loader-data';
 import { Heading } from './components/Heading';
 import { getGoals } from './utils/goal';
 
-export const loader = (async ({ params }) => {
-  // TODO: redirect to login if user unauthed
-  if (!params.userId) throw new Error('no userId');
-
-  return { goals: await getGoals(params.userId) };
+export const loader = (async () => {
+  return await getGoals();
 }) satisfies LoaderFunction;
 
 export const UserGoals = () => {
@@ -18,7 +15,7 @@ export const UserGoals = () => {
       <Nav />
 
       <main className="px-10 pt-10">
-        {data.goals.length ? (
+        {data.goals && data.goals.length ? (
           data.goals.map((g) => {
             // TODO: handle real goals
             return (

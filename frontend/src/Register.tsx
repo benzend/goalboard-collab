@@ -5,9 +5,11 @@ import { Input } from './components/Input';
 import { Heading } from './components/Heading';
 import { Button } from './components/Button';
 import { createUser } from './utils/user';
+import { useAuth } from './auth/AuthProvider';
 
 export const Register = () => {
   const navigate = useNavigate();
+  const auth = useAuth();
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault();
 
@@ -24,7 +26,7 @@ export const Register = () => {
     const name = target.name.value;
     const password = target.password.value;
     const confirmPassword = target.confirmPassword.value;
-    const ContactUsEmail = "testsemail@gmail.com"
+    const ContactUsEmail = 'testsemail@gmail.com';
     if (password !== confirmPassword) throw new Error('passwords do not match');
     if (password.length < 8) throw new Error('password is too short');
     if (password.length > 50)
@@ -32,18 +34,7 @@ export const Register = () => {
 
     console.debug({ username, name, password });
 
-    createUser({ username, name, password })
-      .then((user) => {
-        console.debug({ user });
-
-        navigate(`/login`);
-      })
-      .catch((err: Error) => {
-        console.error({ err });
-        alert(
-          `Failed to create your account. Please reach out to our support team at ${ContactUsEmail}`
-        );
-      });
+    auth?.register({ username, name, password });
   };
   return (
     <div className="min-h-screen">

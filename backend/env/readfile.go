@@ -4,16 +4,19 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
-func ReadFile(filePath string) (map[string]string, error) {
+func ReadFile(name string) (map[string]string, error) {
+	projectPath := "/code"
+	filePath := filepath.Join(projectPath, name)
 	env := make(map[string]string)
 
 	// Open the .env file
 	file, err := os.Open(filePath)
 	if err != nil {
-		return nil, fmt.Errorf("error opening .env file: %v", err)
+		return nil, fmt.Errorf("error opening %v %v", filePath, err)
 	}
 	defer file.Close()
 

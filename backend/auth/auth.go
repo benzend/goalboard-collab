@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/benzend/goalboard/utils"
 	"github.com/golang-jwt/jwt/v5"
@@ -16,16 +17,24 @@ type User struct {
 	Username string `json:"username"`
 }
 
-func Authorize(ctx context.Context, w http.ResponseWriter, req *http.Request, devMode bool) (user User, err error) {
-	// Parse and validate the JWT token from the cookie
+func getEnv() string {
+	variable, exists := os.LookupEnv("ENV")
 
-	if !devMode {
-		// If dev mode is enabled, return a predefined user
-		return User{
-			ID:       1,
-			Username: "testuser",
-		}, nil
+	if !exists {
+		log.Println("Failed to read ENV")
+		return "development"
 	}
+
+	log.Printf("ENV=%v", variable)
+
+	return variable
+}
+
+func Authorize(ctx context.Context, w http.ResponseWriter, req *http.Request) (user User, err error) {
+	if getEnv() == "test" {
+		return User{ID: 1, Username: "gwartney"}, nil
+	}
+	// Parse and validate the JWT token from the cookie
 
 	sessionInfo, err := req.Cookie("jwt_token")
 	if err != nil {

@@ -1,3 +1,5 @@
+import { BACKEND_URL } from './host';
+
 export type User = {
   id: string;
   name: string;
@@ -5,7 +7,7 @@ export type User = {
 };
 
 export async function getUser(id: string): Promise<User> {
-  const res = await fetch(`http://localhost:8000/User/${id}`, {
+  const res = await fetch(`${BACKEND_URL}/User/${id}`, {
     headers: { 'Content-Type': 'application/json' },
   });
   if (!res.ok) throw new Error('failed to fetch user');
@@ -18,8 +20,17 @@ export type CreateUserData = {
   password: string;
 };
 
-export async function createUser(data: CreateUserData): Promise<User> {
-  const res = await fetch('http://localhost:8000/register', {
+export type CreateUserReturnData = {
+  user: User;
+  token: string;
+};
+
+export async function createUser(
+  data: CreateUserData
+): Promise<CreateUserReturnData> {
+  console.log('you know, youre supposed to refresh');
+  const res = await fetch(`${BACKEND_URL}/register`, {
+    mode: 'cors',
     body: JSON.stringify(data),
     method: 'POST',
   });
@@ -35,14 +46,14 @@ export type LoginUserData = {
 };
 
 export type LoginUserReturnData = {
-  token: string;
   user: User;
+  token: string;
 };
 
 export async function loginUser(
   data: LoginUserData
 ): Promise<LoginUserReturnData> {
-  const res = await fetch('http://localhost:8000/login', {
+  const res = await fetch(`${BACKEND_URL}/login`, {
     body: JSON.stringify(data),
     method: 'POST',
   });

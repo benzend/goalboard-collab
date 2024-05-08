@@ -22,37 +22,14 @@ type setGoal struct {
 	TargetPerDay   string `json:"target_per_day"`
 }
 
-var setMap = map[string]interface{}{
-	"devMode": false,
-}
-
-func AuthWrapper(ctx context.Context, w http.ResponseWriter, req *http.Request, settings map[string]interface{}) (*auth.User, error) {
-	var devMode bool
-
-	// Check if "devMode" is present in the map and is a boolean
-	if val, ok := settings["devMode"].(bool); ok {
-		devMode = val
-	} else {
-		return nil, fmt.Errorf("devMode key not found or not a bool")
-	}
-
-	// Call the Authorize function with the devMode parameter
-	user, err := auth.Authorize(ctx, w, req, devMode)
-	if err != nil {
-		return nil, err
-	}
-
-	// Return a pointer to the authorized user
-	return &user, nil
-}
-
 func CreateGoal(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 	utils.EnableCors(&w)
 
 	// Call the authorization function with the new context
-	user, err := AuthWrapper(ctx, w, req, setMap)
+	user, err := auth.Authorize(ctx, w, req)
 
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	var body setGoal
@@ -98,14 +75,10 @@ func CreateGoal(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 func GetGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 	utils.EnableCors(&w)
 
-	user, err := AuthWrapper(ctx, w, req, setMap)
+	user, err := auth.Authorize(ctx, w, req)
 
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	if err != nil {
 		return
 	}
 
@@ -157,7 +130,7 @@ func GetGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 func UpdateGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 	utils.EnableCors(&w)
 
-	_, authErr := AuthWrapper(ctx, w, req, setMap)
+	_, authErr := auth.Authorize(ctx, w, req)
 
 	var body setGoal
 
@@ -177,8 +150,7 @@ func UpdateGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) 
 	// Update goals_ table without Progress as it does not belong to this table
 	updateQuery := `UPDATE goal SET name = $1, long_term_target = $2, target_per_day = $3 WHERE id = $4`
 
-	updateProgQuery := `UPDATE activity SET progress = $1 WHERE goal_id  = $2
-    `
+	updateProgQuery := `UPDATE activity SET progress = $1 WHERE goal_id  = $2`
 	// Execute the update query for goals_
 	_, err := db.Exec(updateQuery, body.Name, body.LongTermTarget, body.TargetPerDay, updateGoalID)
 	if err != nil {
@@ -202,7 +174,7 @@ func UpdateGoals(ctx context.Context, w http.ResponseWriter, req *http.Request) 
 func DeleteGoalAndActivities(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 	utils.EnableCors(&w)
 
-	_, authErr := AuthWrapper(ctx, w, req, setMap)
+	_, authErr := auth.Authorize(ctx, w, req)
 
 	if authErr != nil {
 		return

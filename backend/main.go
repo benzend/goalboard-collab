@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"log"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"github.com/benzend/goalboard/database"
 	"github.com/benzend/goalboard/router"
 	"github.com/benzend/goalboard/routes"
+	"github.com/benzend/goalboard/utils"
 )
 
 func main() {
@@ -21,6 +23,8 @@ func main() {
 	}
 
 	// put the db value into the context to be used in fns
+
+	ctx = context.WithValue(ctx, utils.CTX_KEY_DB, db)
 
 	defer db.Close()
 
@@ -39,7 +43,9 @@ func main() {
 
 	router.Build()
 
-	log.Println("Listening for requests at http://0.0.0.0:8000/")
+	port := 8000
 
-	log.Fatal(http.ListenAndServe("0.0.0.0:8000", nil))
+	log.Printf("Listening for requests at port %v", port)
+
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", port), nil))
 }

@@ -1,3 +1,5 @@
+import { BACKEND_URL } from './host';
+
 export type Goal = {
   id: string;
   name: string;
@@ -6,8 +8,10 @@ export type Goal = {
   durPer: string;
 };
 
-export async function getGoals(userId: string): Promise<Goal[]> {
-  const res = await fetch(`http://localhost:8000/goals?userId=${userId}`);
+export async function getGoals(): Promise<{ goals: Goal[] }> {
+  const res = await fetch(`${BACKEND_URL}/goals`, {
+    credentials: 'include',
+  });
 
   if (!res.ok) throw new Error('failed to fetch goals');
 
@@ -16,9 +20,10 @@ export async function getGoals(userId: string): Promise<Goal[]> {
 
 export type CreateGoalData = Pick<Goal, 'name' | 'dur' | 'durPer' | 'durType'>;
 export async function createGoal(data: CreateGoalData): Promise<Goal> {
-  const res = await fetch(`http://localhost:8000/goals`, {
+  const res = await fetch(`${BACKEND_URL}/goals`, {
     method: 'POST',
     body: JSON.stringify(data),
+    credentials: 'include',
   });
 
   if (!res.ok) throw new Error('failed to create new goal');

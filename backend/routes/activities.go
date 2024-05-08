@@ -18,7 +18,7 @@ type ActivityProgress struct {
 
 func CreateActivity(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 	utils.EnableCors(&w)
-	user, err := auth.Authorize(ctx, w, req, false)
+	user, err := auth.Authorize(ctx, w, req)
 
 	if err != nil {
 		return

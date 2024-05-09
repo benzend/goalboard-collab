@@ -55,7 +55,8 @@ export const AuthProvider = () => {
     setUser(null);
     setToken('');
     localStorage.removeItem('site');
-    // navigate('/login');
+    document.cookie = '';
+    navigate('/login');
   };
 
   const register = async (data: RegisterActionData) => {

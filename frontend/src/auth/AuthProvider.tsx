@@ -29,20 +29,15 @@ export const AuthProvider = () => {
   const navigate = useNavigate();
   const loginAction = async (data: LoginActionData) => {
     try {
-      console.log('before res');
       const res = await loginUser({
         username: data.username,
         password: data.password,
       });
-      console.log({ res });
       if (res) {
         setUser(res.user);
         setToken(res.token);
-        console.log('setting cookie...');
         document.cookie = `jwt_token=${res.token}`;
-        localStorage.setItem('site', res.token);
-        // navigate(`/${res.user.id}/goals`);
-        return;
+        navigate(`/goals`);
       } else {
         throw new Error('failed to sign in');
       }
@@ -54,7 +49,6 @@ export const AuthProvider = () => {
   const logOut = () => {
     setUser(null);
     setToken('');
-    localStorage.removeItem('site');
     document.cookie = '';
     navigate('/login');
   };

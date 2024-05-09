@@ -42,7 +42,7 @@ export const AuthProvider = () => {
       if (res) {
         setUser(res.user);
         setToken(res.token);
-        navigate(`/goals`);
+        navigate('/goals/new');
       } else {
         throw new Error('failed to sign in');
       }

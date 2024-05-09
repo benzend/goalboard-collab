@@ -27,8 +27,6 @@ export const Login = () => {
     const username = target.username.value;
     const password = target.password.value;
 
-    console.debug({ username, password });
-
     /**
      * TODO: Figure out how to store user validation internally
      * TODO: so that we can move around the app freely once

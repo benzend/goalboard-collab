@@ -11,7 +11,7 @@ export const Login = () => {
   const auth = useAuth();
 
   if (auth?.user) {
-    navigate(`/${auth?.user.id}/goals`);
+    navigate('/goals');
   }
 
   const handleSubmit: FormEventHandler = (e: FormEvent) => {

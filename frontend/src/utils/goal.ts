@@ -1,5 +1,3 @@
-import { BACKEND_URL } from './host';
-
 export type Goal = {
   id: string;
   name: string;
@@ -9,7 +7,7 @@ export type Goal = {
 };
 
 export async function getGoals(): Promise<{ goals: Goal[] }> {
-  const res = await fetch(`${BACKEND_URL}/goals`, {
+  const res = await fetch(`/api/goals`, {
     credentials: 'include',
   });
 
@@ -20,7 +18,7 @@ export async function getGoals(): Promise<{ goals: Goal[] }> {
 
 export type CreateGoalData = Pick<Goal, 'name' | 'dur' | 'durPer' | 'durType'>;
 export async function createGoal(data: CreateGoalData): Promise<Goal> {
-  const res = await fetch(`${BACKEND_URL}/goals`, {
+  const res = await fetch(`/api/goals`, {
     method: 'POST',
     body: JSON.stringify(data),
     credentials: 'include',

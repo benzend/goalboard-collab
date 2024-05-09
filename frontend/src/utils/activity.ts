@@ -11,7 +11,7 @@ export type CreateActivityData = {
 export async function createActivity(
   data: CreateActivityData
 ): Promise<Activity> {
-  const res = await fetch('http://localhost:8000/activity', {
+  const res = await fetch('/api/activity', {
     method: 'POST',
     body: JSON.stringify(data),
   });

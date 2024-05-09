@@ -7,7 +7,6 @@ import {
   loginUser,
   logoutUser,
 } from '../utils/user';
-import { deleteCookie, setCookie } from '../utils/cookie';
 
 export type LoginActionData = {
   username: string;
@@ -43,7 +42,6 @@ export const AuthProvider = () => {
       if (res) {
         setUser(res.user);
         setToken(res.token);
-        // setCookie('jwt_token', res.token);
         navigate(`/goals`);
       } else {
         throw new Error('failed to sign in');
@@ -56,7 +54,6 @@ export const AuthProvider = () => {
   const logOut = async () => {
     setUser(null);
     setToken('');
-    // deleteCookie('jwt_token');
     await logoutUser();
     navigate('/login');
   };
@@ -72,7 +69,6 @@ export const AuthProvider = () => {
       if (res) {
         setUser(res.user);
         setToken(res.token);
-        // setCookie('jwt_token', res.token);
         navigate('/goals');
       } else {
         throw new Error('failed to register user');

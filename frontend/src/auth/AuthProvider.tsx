@@ -67,10 +67,9 @@ export const AuthProvider = () => {
         document.cookie = `jwt_token=${res.token}`;
         localStorage.setItem('site', res.token);
         navigate('/goals');
-        return;
+      } else {
+        throw new Error('failed to register user');
       }
-
-      throw new Error('failed to register user');
     } catch (err) {
       console.error(err);
     }

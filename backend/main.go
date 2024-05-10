@@ -40,6 +40,7 @@ func main() {
 	router.Get("/goals", routes.GetGoals)
 	router.Post("/goals", routes.CreateGoal)
 	router.Post("/activities", routes.CreateActivity)
+	router.Get("/current_user", routes.GetCurrentUser)
 
 	router.Build()
 

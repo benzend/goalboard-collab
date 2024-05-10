@@ -11,7 +11,7 @@ export const Login = () => {
   const auth = useAuth();
 
   if (auth?.user) {
-    navigate(`/${auth?.user.id}/goals`);
+    navigate('/goals');
   }
 
   const handleSubmit: FormEventHandler = (e: FormEvent) => {
@@ -26,8 +26,6 @@ export const Login = () => {
     // const email = target.email.value;
     const username = target.username.value;
     const password = target.password.value;
-
-    console.debug({ username, password });
 
     /**
      * TODO: Figure out how to store user validation internally

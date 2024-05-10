@@ -51,3 +51,23 @@ export async function loginUser(
 
   return await res.json();
 }
+
+export async function logoutUser() {
+  const res = await fetch('/api/logout', {
+    method: 'POST',
+  });
+
+  if (!res.ok) throw new Error('failed to log user out');
+}
+
+export type GetCurrentUserReturnData = {
+  user: User;
+};
+
+export async function getCurrentUser(): Promise<GetCurrentUserReturnData> {
+  const res = await fetch('/api/current_user');
+
+  if (!res.ok) throw new Error('failed to grab user');
+
+  return await res.json();
+}

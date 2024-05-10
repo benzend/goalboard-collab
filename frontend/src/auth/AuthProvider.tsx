@@ -1,6 +1,12 @@
-import { useContext, createContext, useState } from 'react';
+import { useContext, createContext, useState, useEffect } from 'react';
 import { useNavigate, Outlet } from 'react-router-dom';
-import { User, createUser, loginUser } from '../utils/user';
+import {
+  User,
+  createUser,
+  getCurrentUser,
+  loginUser,
+  logoutUser,
+} from '../utils/user';
 
 export type LoginActionData = {
   username: string;
@@ -29,20 +35,14 @@ export const AuthProvider = () => {
   const navigate = useNavigate();
   const loginAction = async (data: LoginActionData) => {
     try {
-      console.log('before res');
       const res = await loginUser({
         username: data.username,
         password: data.password,
       });
-      console.log({ res });
       if (res) {
         setUser(res.user);
         setToken(res.token);
-        console.log('setting cookie...');
-        document.cookie = `jwt_token=${res.token}`;
-        localStorage.setItem('site', res.token);
-        // navigate(`/${res.user.id}/goals`);
-        return;
+        navigate('/goals/new');
       } else {
         throw new Error('failed to sign in');
       }
@@ -51,11 +51,11 @@ export const AuthProvider = () => {
     }
   };
 
-  const logOut = () => {
+  const logOut = async () => {
     setUser(null);
     setToken('');
-    localStorage.removeItem('site');
-    // navigate('/login');
+    await logoutUser();
+    navigate('/login');
   };
 
   const register = async (data: RegisterActionData) => {
@@ -69,17 +69,26 @@ export const AuthProvider = () => {
       if (res) {
         setUser(res.user);
         setToken(res.token);
-        document.cookie = `jwt_token=${res.token}`;
-        localStorage.setItem('site', res.token);
         navigate('/goals');
-        return;
+      } else {
+        throw new Error('failed to register user');
       }
-
-      throw new Error('failed to register user');
     } catch (err) {
       console.error(err);
     }
   };
+
+  useEffect(() => {
+    if (!user) {
+      getCurrentUser()
+        .then((res) => {
+          setUser(res.user);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+  }, []);
 
   return (
     <AuthContext.Provider

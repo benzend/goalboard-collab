@@ -14,9 +14,9 @@ func Logout(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		Expires:  time.Now().Add(-time.Hour), // Set expiration to a past time
 		HttpOnly: true,
 		Secure:   false, // Set to true if using HTTPS
+		Path:     "/",
 	}
 	http.SetCookie(w, &cookie)
 
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
-
 }

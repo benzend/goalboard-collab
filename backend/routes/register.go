@@ -9,6 +9,7 @@ import (
 	"time"
 
 	user_model "github.com/benzend/goalboard/models/user"
+	"github.com/benzend/goalboard/pw"
 	"github.com/benzend/goalboard/utils"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -44,9 +45,15 @@ func Register(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	password := body.Password
-	//hash, _ := pw.HashPassword(password) // ignore error for the sake of simplicity
+	hash, err := pw.HashPassword(password) // ignore error for the sake of simplicity
 
-	err = user_model.Create(db, body.Username, password)
+	if err != nil {
+		http.Error(w, "server error: failed to hash password", http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
+
+	err = user_model.Create(db, body.Username, hash)
 
 	if err != nil {
 		http.Error(w, "server error: failed to create user", http.StatusInternalServerError)

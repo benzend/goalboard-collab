@@ -40,7 +40,7 @@ export const Register = () => {
     <div className="min-h-screen">
       <Nav />
 
-      <main className="px-10 pt-10">
+      <main className="px-10 pt-10 max-w-lg">
         <Heading el="h1" type="h2" className="mb-10">
           Sign up
         </Heading>

@@ -1,5 +1,3 @@
-BEGIN;
-
 CREATE TABLE IF NOT EXISTS activity (
     id        SERIAL PRIMARY KEY,
     progress  FLOAT,
@@ -8,6 +6,3 @@ CREATE TABLE IF NOT EXISTS activity (
         FOREIGN KEY (goal_id)
         REFERENCES goal (id)  -- Reference the goalId column in the goals_ table
 );
-
-
-COMMIT;

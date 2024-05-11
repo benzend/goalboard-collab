@@ -1,9 +1,5 @@
-BEGIN;
-
 CREATE TABLE IF NOT EXISTS user_ (
 	id         SERIAL PRIMARY KEY,
 	username   VARCHAR (50) UNIQUE NOT NULL,
 	password   VARCHAR (70) NOT NULL
 );
-
-COMMIT;

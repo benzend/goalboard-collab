@@ -134,7 +134,8 @@ COPY public.migration (id, filename) FROM stdin;
 1	20240511171546_create_user_table.sql
 2	20240511171641_create_goal_table.sql
 3	20240511171704_create_activity_table.sql
+4	20240511173851_update_user_password.sql
 \.
 -- Name: migration_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
-SELECT pg_catalog.setval('public.migration_id_seq', 3, true);
+SELECT pg_catalog.setval('public.migration_id_seq', 4, true);
 -- PostgreSQL database dump complete

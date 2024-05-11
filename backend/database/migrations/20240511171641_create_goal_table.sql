@@ -1,5 +1,3 @@
-BEGIN;
-
 CREATE TABLE IF NOT EXISTS goal (
     id                SERIAL PRIMARY KEY,
     name              VARCHAR(50),
@@ -10,5 +8,3 @@ CREATE TABLE IF NOT EXISTS goal (
         FOREIGN KEY (user_id)
         REFERENCES user_ (id)  -- Reference the id column in the user_ table
 );
-
-COMMIT;

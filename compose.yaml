@@ -20,7 +20,7 @@ services:
       - PG_USER=postgres
       - PG_PASSWORD=mysecretpassword
     volumes:
-      - ./backend:/code:ro
+      - ./backend:/code
     networks:
       - server-side
       - client-side

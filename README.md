@@ -1,5 +1,6 @@
 ![Header](https://github.com/GwartneyDev/goalboard-collab/blob/main/Capture.png)
-  >Goalboard is under current development, and we are working hard to bring our vison to reality! 
+
+> Goalboard is under current development, and we are working hard to bring our vison to reality!
 
 # Goalboard
 
@@ -51,20 +52,16 @@ docker compose up -d
 
 ### Migrations
 
-Before you get started, you'll want to migrate the database. Right now we're doing this manually. The process will look something like this:
+Before you get started, you'll want to migrate your database.
 
 Go into the backend container:
 
 ```bash
-docker exec -it goalboard-backend-1 sh
+docker exec -it goalboard-backend-1 bash
 ```
 
-Run each migration. The command per file looks something like this:
+Run the migration scripts:
 
 ```bash
-psql postgres://postgres:<password>@db/postgres -a -f /code/database/migrations/<my-migration-file>.up.sql
+/bin/bash migrate.sh up
 ```
-
-We'll need to figure out a out to manage our migrations to make this a bit easier.
-
-PS: Make sure to replace and use the correct settings for your current project setup!

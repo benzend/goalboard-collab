@@ -36,7 +36,9 @@ services:
     volumes:
       - ./backend:/code
     working_dir: /code
-    command: ENV=test go test ./UnitTesting -count=1
+    command: go test ./UnitTesting -count=1
+    environment:
+      - ENV=test
     networks:
       - server-side
 

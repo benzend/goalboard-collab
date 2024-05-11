@@ -1,5 +1,5 @@
 FROM golang:alpine AS base
-RUN apk update && apk add --no-cache git
+RUN apk update && apk add --no-cache git bash
 
 RUN apk add postgresql-client
 
